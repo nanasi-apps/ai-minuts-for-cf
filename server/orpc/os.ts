@@ -5,6 +5,7 @@ import type { PrismaClient } from "@/server/prisma-client/client";
 
 export interface ORPCContext {
 	db: PrismaClient;
+    ai: Ai;
 }
 
 const baseOS = implement(contract);
