@@ -24,9 +24,9 @@ const goToDashboard = () => {
           <span class="text-2xl font-bold text-mattya-800 dark:text-mattya-400 tracking-tight">{{ $t('header.title') }}</span>
         </div>
         <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-600 dark:text-stone-400">
-          <a href="/#features" class="hover:text-mattya-600 dark:hover:text-mattya-300 transition-colors">{{ $t('header.nav.features') }}</a>
-          <a href="/#pricing" class="hover:text-mattya-600 dark:hover:text-mattya-300 transition-colors">{{ $t('header.nav.pricing') }}</a>
-          <a href="/#about" class="hover:text-mattya-600 dark:hover:text-mattya-300 transition-colors">{{ $t('header.nav.about') }}</a>
+          <NuxtLink href="/#features" class="hover:text-mattya-600 dark:hover:text-mattya-300 transition-colors">{{ $t('header.nav.features') }}</NuxtLink>
+          <NuxtLink href="/#pricing" class="hover:text-mattya-600 dark:hover:text-mattya-300 transition-colors">{{ $t('header.nav.pricing') }}</NuxtLink>
+          <NuxtLink href="/#about" class="hover:text-mattya-600 dark:hover:text-mattya-300 transition-colors">{{ $t('header.nav.about') }}</NuxtLink>
         </nav>
         <div class="flex gap-3 items-center">
           <template v-if="isLoading">

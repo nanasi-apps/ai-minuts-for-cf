@@ -11,3 +11,6 @@ onMounted(() => {
     <NuxtPage />
   </NuxtLayout>
 </template>
+
+<style scoped>
+</style>

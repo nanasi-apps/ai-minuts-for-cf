@@ -8,9 +8,9 @@
           {{ $t('footer.copyright') }}
         </div>
         <div class="flex gap-6 text-stone-500 dark:text-stone-500 text-sm">
-          <a href="#" class="hover:text-mattya-700 dark:hover:text-mattya-400">{{ $t('footer.privacy') }}</a>
-          <a href="#" class="hover:text-mattya-700 dark:hover:text-mattya-400">{{ $t('footer.terms') }}</a>
-          <a href="#" class="hover:text-mattya-700 dark:hover:text-mattya-400">{{ $t('footer.contact') }}</a>
+          <NuxtLink href="#" class="hover:text-mattya-700 dark:hover:text-mattya-400">{{ $t('footer.privacy') }}</NuxtLink>
+          <NuxtLink href="#" class="hover:text-mattya-700 dark:hover:text-mattya-400">{{ $t('footer.terms') }}</NuxtLink>
+          <NuxtLink href="#" class="hover:text-mattya-700 dark:hover:text-mattya-400">{{ $t('footer.contact') }}</NuxtLink>
         </div>
       </div>
     </footer>

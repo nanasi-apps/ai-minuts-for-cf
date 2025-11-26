@@ -56,4 +56,7 @@ export default defineNuxtConfig({
 			sourcemap: false,
 		},
 	},
+	experimental: {
+		viewTransition: true,
+	},
 });
