@@ -26,6 +26,9 @@ model User {
   
   /// ユーザーに紐づく認証アカウント（複数のプロバイダーでログイン可能）
   accounts  Account[]
+
+  /// 所属する組織
+  memberships OrganizationMember[]
 }
 
 /// 認証アカウントテーブル
@@ -49,5 +52,47 @@ model Account {
   
   /// 同一プロバイダー・同一プロバイダーIDの組み合わせは一意
   @@unique([provider, providerId])
+}
+
+/// 組織テーブル
+model Organization {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     OrganizationMember[]
+  invitations OrganizationInvitation[]
+}
+
+/// 組織メンバーテーブル
+model OrganizationMember {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  userId         Int
+  role           String       // "OWNER", "ADMIN", "MEMBER"
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+}
+
+/// 組織招待テーブル
+model OrganizationInvitation {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  email          String
+  role           String       // "ADMIN", "MEMBER"
+  token          String       @unique
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, email])
 }
 
