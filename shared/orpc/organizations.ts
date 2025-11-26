@@ -23,6 +23,52 @@ export const organizations = oc.router({
 			}),
 		),
 
+	list: oc.output(
+		z.array(
+			z.object({
+				id: z.number(),
+				name: z.string(),
+				slug: z.string(),
+				role: z.enum(["OWNER", "ADMIN", "MEMBER"]),
+			}),
+		),
+	),
+
+	get: oc.input(z.object({ slug: z.string() })).output(
+		z.object({
+			id: z.number(),
+			name: z.string(),
+			slug: z.string(),
+			allowedDomains: z.string().nullable(),
+			role: z.enum(["OWNER", "ADMIN", "MEMBER"]),
+			members: z.array(
+				z.object({
+					id: z.number(),
+					name: z.string().nullable(),
+					email: z.string(),
+					role: z.enum(["OWNER", "ADMIN", "MEMBER"]),
+					avatarUrl: z.string().nullable(),
+				}),
+			),
+		}),
+	),
+
+	update: oc
+		.input(
+			z.object({
+				id: z.number(),
+				name: z.string().optional(),
+				allowedDomains: z.string().optional(),
+			}),
+		)
+		.output(
+			z.object({
+				id: z.number(),
+				name: z.string(),
+				allowedDomains: z.string().nullable(),
+			}),
+		),
+
 	invite: oc
 		.input(
 			z.object({

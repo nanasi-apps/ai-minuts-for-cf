@@ -68,6 +68,9 @@ model Organization {
   slug      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  /// 組織に参加可能なメールドメイン（カンマ区切りで複数指定可）
+  allowedDomains String?
 
   members     OrganizationMember[]
   invitations OrganizationInvitation[]

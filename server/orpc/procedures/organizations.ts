@@ -41,6 +41,104 @@ export default {
 			return org;
 		}),
 
+	list: os.organizations.list
+		.use(authMiddleware)
+		.handler(async ({ context }) => {
+			const userId = context.userId;
+
+			const members = await context.db.organizationMember.findMany({
+				where: { userId },
+				include: { organization: true },
+			});
+
+			return members.map((m) => ({
+				id: m.organization.id,
+				name: m.organization.name,
+				slug: m.organization.slug,
+				role: m.role,
+			}));
+		}),
+
+	get: os.organizations.get
+		.use(authMiddleware)
+		.handler(async ({ input, context }) => {
+			const userId = context.userId;
+
+			const org = await context.db.organization.findUnique({
+				where: { slug: input.slug },
+				include: {
+					members: {
+						include: {
+							user: true,
+						},
+					},
+				},
+			});
+
+			if (!org) {
+				throw new ORPCError("NOT_FOUND", {
+					message: "Organization not found",
+				});
+			}
+
+			const member = org.members.find((m) => m.userId === userId);
+			if (!member) {
+				throw new ORPCError("FORBIDDEN", {
+					message: "You are not a member of this organization",
+				});
+			}
+
+			return {
+				id: org.id,
+				name: org.name,
+				slug: org.slug,
+				allowedDomains: org.allowedDomains,
+				role: member.role,
+				members: org.members.map((m) => ({
+					id: m.id,
+					name: m.user.name,
+					email: m.user.email,
+					role: m.role,
+					avatarUrl: m.user.avatarUrl,
+				})),
+			};
+		}),
+
+	update: os.organizations.update
+		.use(authMiddleware)
+		.handler(async ({ input, context }) => {
+			const userId = context.userId;
+
+			const member = await context.db.organizationMember.findUnique({
+				where: {
+					organizationId_userId: {
+						organizationId: input.id,
+						userId: userId,
+					},
+				},
+			});
+
+			if (!member || member.role !== OrganizationRole.OWNER) {
+				throw new ORPCError("FORBIDDEN", {
+					message: "Only OWNER can update organization settings",
+				});
+			}
+
+			const updatedOrg = await context.db.organization.update({
+				where: { id: input.id },
+				data: {
+					name: input.name,
+					allowedDomains: input.allowedDomains,
+				},
+			});
+
+			return {
+				id: updatedOrg.id,
+				name: updatedOrg.name,
+				allowedDomains: updatedOrg.allowedDomains,
+			};
+		}),
+
 	invite: os.organizations.invite
 		.use(authMiddleware)
 		.handler(async ({ input, context }) => {
