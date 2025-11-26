@@ -1,5 +1,5 @@
-import { prisma } from "~/server/prisma-client";
-import { createSessionToken, getGoogleUser } from "~/server/utils/auth";
+import { createPrismaClient } from "@/server/prisma-client";
+import { createSessionToken, getGoogleUser } from "@/server/utils/auth";
 
 export default defineEventHandler(async (event) => {
 	const query = getQuery(event);
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
 	try {
 		const googleUser = await getGoogleUser(code);
-
+		const prisma = createPrismaClient(event.context.cloudflare?.env?.DB!);
 		// Find or create user
 		let user = await prisma.user.findUnique({
 			where: { email: googleUser.email },
