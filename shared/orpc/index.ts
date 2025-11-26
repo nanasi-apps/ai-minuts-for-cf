@@ -1,6 +1,6 @@
 import { oc } from "@orpc/contract";
-import { example } from "#/orpc/example";
+import users from "#/orpc/users";
 
 export const contract = oc.router({
-	example,
+	users,
 });

@@ -1,6 +1,6 @@
-import { os } from "@/server/orpc/os";
 import { ORPCError } from "@orpc/server";
 import { authMiddleware } from "@/server/middlewares/auth";
+import { os } from "@/server/orpc/os";
 import { userPackingService } from "@/server/service/UserPackingService";
 
 /**
@@ -12,25 +12,23 @@ export default {
 	 * 認証済みユーザーの情報を取得
 	 * JWTミドルウェアで設定された userId を使用してDBからユーザー情報を取得
 	 */
-	getMe: os.users.getMe
-		.use(authMiddleware)
-		.handler(async ({ context }) => {
-			// context.userId は JWT認証ミドルウェアで設定される
-			const userId = context.userId;
+	getMe: os.users.getMe.use(authMiddleware).handler(async ({ context }) => {
+		// context.userId は JWT認証ミドルウェアで設定される
+		const userId = context.userId;
 
-			const user = await context.db.user.findUnique({
-				where: { id: userId },
+		const user = await context.db.user.findUnique({
+			where: { id: userId },
+		});
+
+		// ユーザーが見つからない場合（通常は発生しないが、削除済みの場合など）
+		if (!user) {
+			throw new ORPCError("NOT_FOUND", {
+				message: "ユーザーが見つかりません",
 			});
+		}
 
-			// ユーザーが見つからない場合（通常は発生しないが、削除済みの場合など）
-			if (!user) {
-				throw new ORPCError("NOT_FOUND", {
-					message: "ユーザーが見つかりません",
-				});
-			}
-
-			return userPackingService.pack(user);
-		}),
+		return userPackingService.pack(user);
+	}),
 
 	/**
 	 * 指定IDのユーザー情報を取得
@@ -97,4 +95,3 @@ export default {
 			return userPackingService.pack(updatedUser);
 		}),
 };
-

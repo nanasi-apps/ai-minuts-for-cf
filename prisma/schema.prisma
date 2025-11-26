@@ -7,3 +7,47 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+/// ユーザーテーブル
+/// Google/GitHub OAuth認証に対応したユーザー情報を管理する
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  
+  /// ユーザーのプロフィール画像URL（OAuth プロバイダーから取得）
+  avatarUrl String?
+  
+  /// 自己紹介文（プロフィール編集で設定可能）
+  bio       String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  /// ユーザーに紐づく認証アカウント（複数のプロバイダーでログイン可能）
+  accounts  Account[]
+}
+
+/// 認証アカウントテーブル
+/// OAuth プロバイダー（Google/GitHub）との紐付けを管理する
+/// 1ユーザーが複数のプロバイダーでログインできるよう設計
+model Account {
+  id         Int      @id @default(autoincrement())
+  
+  /// 認証プロバイダー種別（"google" または "github"）
+  provider   String
+  
+  /// プロバイダー側のユーザー識別子
+  providerId String
+  
+  /// ユーザーへの外部キー
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  /// 同一プロバイダー・同一プロバイダーIDの組み合わせは一意
+  @@unique([provider, providerId])
+}
+
