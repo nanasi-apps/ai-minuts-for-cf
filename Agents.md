@@ -10,6 +10,7 @@ All agents must strictly follow contract-first development principles, enforce s
 
 Agents must fully complete the assigned task. Partial answers, skipped reasoning, or omitted sections are not allowed.
 Focus exclusively on the requested task until it is completed.
+Complete tasks without creating to-do lists.
 
 ### 2. Output Language
 
