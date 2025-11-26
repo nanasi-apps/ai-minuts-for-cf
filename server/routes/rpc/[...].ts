@@ -7,14 +7,14 @@ const handler = new RPCHandler(router);
 export default defineEventHandler(async (event) => {
 	// Get D1 binding from Cloudflare context
 	const { cloudflare } = event.context;
-	const d1 = cloudflare?.env?.DB as D1Database;
+	const d1 = cloudflare?.env?.ai_minuts as D1Database;
 	const ai = cloudflare?.env?.AI as Ai;
 	// JWT署名・検証用の秘密鍵（wrangler secret で設定）
 	const jwtSecret = cloudflare?.env?.JWT_SECRET as string | undefined;
 
 	if (!d1) {
 		setResponseStatus(event, 500, "Database not configured");
-		return "Database binding (DB) not found in Cloudflare environment";
+		return "Database binding (ai_minuts) not found in Cloudflare environment";
 	}
 
 	// Create Prisma client with D1 adapter for this request
@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
 			ai: ai,
 			authHeader: authHeader,
 			jwtSecret: jwtSecret,
+			event: event,
 		},
 	});
 

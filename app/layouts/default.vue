@@ -1,14 +1,23 @@
 <script setup lang="ts">
+import Footer from "@/app/components/layout/Footer.vue";
+import Header from "@/app/components/layout/Header.vue";
 
+const nowUrl = useRoute().fullPath;
+const isExcluded = !nowUrl.startsWith("/dashboard");
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 p-4">
-    <slot />
+  <div class="min-h-screen bg-mattya-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200 font-sans selection:bg-mattya-200 dark:selection:bg-mattya-900">
+    <Header v-if="isExcluded" />
+    <main class="min-h-[calc(100vh-4rem)]" :class="isExcluded ? 'pt-16' : ''">
+      <slot />
+    </main>
+    <Footer v-if="isExcluded" />
   </div>
 </template>
 
-
 <style scoped>
+@reference "@/app/assets/index.css";
+
 
 </style>

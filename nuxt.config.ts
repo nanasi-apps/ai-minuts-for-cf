@@ -7,9 +7,19 @@ export default defineNuxtConfig({
 
 	css: ["./app/assets/index.css"],
 
-	modules: ["nitro-cloudflare-dev"],
+	modules: ["nitro-cloudflare-dev", "@nuxtjs/i18n"],
 
 	compatibilityDate: "2025-11-25",
+
+	i18n: {
+		defaultLocale: "ja",
+		locales: [
+			{ code: "en", name: "English", file: "en.json" },
+			{ code: "ja", name: "日本語", file: "ja.json" },
+		],
+		lazy: true,
+		strategy: "no_prefix",
+	},
 
 	// Provide path aliases: $root -> root, # -> shared
 	alias: {

@@ -14,6 +14,8 @@ export interface ORPCContext {
 	authHeader?: string;
 	/** JWT署名・検証用の秘密鍵（環境変数 JWT_SECRET から取得） */
 	jwtSecret?: string;
+	/** H3 Event object for accessing cookies etc. */
+	event: any;
 }
 
 /**

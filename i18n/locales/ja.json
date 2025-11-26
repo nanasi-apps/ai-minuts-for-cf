@@ -1,0 +1,86 @@
+{
+	"header": {
+		"title": "AI Minutes",
+		"nav": {
+			"features": "機能",
+			"pricing": "料金",
+			"about": "私たちについて"
+		},
+		"login": "ログイン",
+		"logout": "ログアウト",
+		"gotoDashboard": "ダッシュボードに行く"
+	},
+	"hero": {
+		"badge": "AI搭載の次世代議事録ツール",
+		"title": {
+			"line1": "会議の記録は、",
+			"line2": "AIにお任せ。"
+		},
+		"subtitle": {
+			"line1": "リアルタイム文字起こし、要約、タスク抽出まで。",
+			"line2": "AI Minutesなら、面倒な議事録作成から解放され、",
+			"line3": "本質的な議論や創造的な活動に集中できます。"
+		},
+		"cta": {
+			"start": "無料で始める",
+			"demo": "デモを見る"
+		},
+		"mockup": {
+			"alt": "Dashboard UI Mockup"
+		}
+	},
+	"features": {
+		"title": "必要な機能は、すべてここに。",
+		"description": "AI Minutesは、会議の効率化に必要なあらゆる機能を備えています。シンプルで直感的なインターフェースで、誰でもすぐに使いこなせます。",
+		"items": {
+			"transcription": {
+				"title": "リアルタイム文字起こし",
+				"description": "高精度な音声認識エンジンにより、会議の発言をリアルタイムでテキスト化。聞き逃しを防ぎます。"
+			},
+			"summary": {
+				"title": "スマート要約",
+				"description": "長時間の会議もAIが瞬時に要約。重要なポイントだけを短時間で把握できます。"
+			},
+			"tasks": {
+				"title": "タスク自動抽出",
+				"description": "会話の中から「やるべきこと」を自動で検出し、アクションアイテムとしてリストアップします。"
+			}
+		}
+	},
+	"cta": {
+		"title": {
+			"line1": "あなたのチームも、",
+			"line2": "AIで生産性を最大化しませんか？"
+		},
+		"description": {
+			"line1": "今すぐAI Minutesを導入して、会議のあり方を変えましょう。",
+			"line2": "14日間の無料トライアルで、その効果を実感してください。"
+		},
+		"button": "無料で試してみる"
+	},
+	"login": {
+		"title": "Welcome Back",
+		"subtitle": "Sign in to continue to AI Minutes",
+		"google": "Sign in with Google"
+	},
+	"footer": {
+		"copyright": "© 2025 nanasi-apps.xyz All rights reserved.",
+		"privacy": "プライバシーポリシー",
+		"terms": "利用規約",
+		"contact": "お問い合わせ"
+	},
+	"dashboard": {
+		"overview": "概要",
+		"settings": "設定",
+		"minuts": {
+			"title": "一覧",
+			"create": "新しいミーティングを作成",
+			"empty": "まだミーティングがありません。新しいミーティングを作成しましょう！"
+		}
+	},
+	"sidebar": {
+		"overview": "概要",
+		"settings": "設定"
+	},
+	"minuts": "議事録"
+}

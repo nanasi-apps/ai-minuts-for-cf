@@ -1,0 +1,29 @@
+<script setup lang="ts">
+import SidebarItem from "@/app/components/dashboard/sidebar/SidebarItem.vue";
+
+const router = useRouter();
+
+defineProps<{
+	items: Array<{
+		name: string;
+		icon: string;
+		route: string;
+	}>;
+}>();
+
+const goToRoute = (route: string) => {
+	router.push(route);
+};
+</script>
+
+<template>
+    <div class="w-48 bg-stone-100 dark:bg-stone-900 h-screen p-6">
+      <nav class="space-y-2">
+        <SidebarItem v-for="item in items" :key="item.route" :item="item" @click="goToRoute(item.route)" />
+      </nav>
+    </div>
+</template>
+
+<style scoped>
+
+</style>

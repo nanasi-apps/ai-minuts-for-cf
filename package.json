@@ -17,18 +17,21 @@
 		"db:migrate:local": "node scripts/db-migrate.mjs apply --local",
 		"db:migrate:remote": "node scripts/db-migrate.mjs apply --remote",
 		"db:migrate:status": "node scripts/db-migrate.mjs list",
+		"db:migrate:status:remote": "node scripts/db-migrate.mjs list --remote",
 		"deploy": "pnpm build && wrangler deploy",
 		"cf-typegen": "wrangler types",
 		"prepare": "husky",
 		"typecheck": "nuxt typecheck"
 	},
 	"dependencies": {
+		"@nuxtjs/i18n": "10.2.1",
 		"@orpc/client": "^1.11.3",
 		"@orpc/contract": "^1.11.3",
 		"@orpc/server": "^1.11.3",
 		"@prisma/adapter-d1": "^7.0.1",
 		"@prisma/client": "7.0.1",
 		"@tailwindcss/vite": "^4.1.17",
+		"@tanstack/vue-store": "^0.8.0",
 		"dotenv": "^17.2.3",
 		"jose": "^6.1.2",
 		"nitro-cloudflare-dev": "^0.2.2",
@@ -46,5 +49,6 @@
 		"@vue/language-server": "^3.1.5",
 		"husky": "^9.1.7",
 		"prisma": "^7.0.1"
-	}
+	},
+	"packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"
 }

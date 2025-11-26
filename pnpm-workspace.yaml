@@ -6,4 +6,5 @@ onlyBuiltDependencies:
   - prisma
   - sharp
   - unrs-resolver
+  - vue-demi
   - workerd

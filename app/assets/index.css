@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@theme {
+    --color-mattya-50:  #F7FAF1;
+    --color-mattya-100: #EEF4E2;
+    --color-mattya-200: #DDE8C5;
+    --color-mattya-300: #C7D7A0;
+    --color-mattya-400: #AFC88A;
+    --color-mattya-500: #8FA953;
+    --color-mattya-600: #738A3F;
+    --color-mattya-700: #566622;
+    --color-mattya-800: #394513;
+    --color-mattya-900: #1E260B;
+}
+
+*, *::before, *::after {
+    transition: all 0.1s ease !important;
+}

@@ -14,8 +14,19 @@ export default defineEventHandler(async (event) => {
 
 	try {
 		const googleUser = await getGoogleUser(code);
-		// biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: 無かったら無い方が悪い
-		const prisma = createPrismaClient(event.context.cloudflare?.env?.DB!);
+		const env = event.context.cloudflare?.env;
+		if (!env?.ai_minuts) {
+			console.error(
+				"Cloudflare environment or ai_minuts binding missing. Available keys:",
+				env ? Object.keys(env) : "env is undefined",
+			);
+			throw createError({
+				statusCode: 500,
+				statusMessage: "Database configuration error",
+			});
+		}
+		// biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: Checked above
+		const prisma = createPrismaClient(env.ai_minuts as D1Database);
 		// Find or create user
 		let user = await prisma.user.findUnique({
 			where: { email: googleUser.email },

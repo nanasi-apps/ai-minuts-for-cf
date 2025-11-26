@@ -1,0 +1,81 @@
+{
+	"header": {
+		"title": "AI Minutes",
+		"nav": {
+			"features": "Features",
+			"pricing": "Pricing",
+			"about": "About Us"
+		},
+		"login": "Login",
+		"logout": "Logout"
+	},
+	"hero": {
+		"badge": "Next-Generation Meeting Minutes Tool Powered by AI",
+		"title": {
+			"line1": "Leave your meeting records",
+			"line2": "to AI."
+		},
+		"subtitle": {
+			"line1": "From real-time transcription to summarization and task extraction.",
+			"line2": "With AI Minutes, you're freed from tedious minute-taking,",
+			"line3": "allowing you to focus on meaningful discussions and creative activities."
+		},
+		"cta": {
+			"start": "Get Started for Free",
+			"demo": "Watch Demo"
+		},
+		"mockup": {
+			"alt": "Dashboard UI Mockup"
+		}
+	},
+	"features": {
+		"title": "Everything you need, all in one place.",
+		"description": "AI Minutes provides all the features you need to streamline your meetings. With a simple and intuitive interface, anyone can master it instantly.",
+		"items": {
+			"transcription": {
+				"title": "Real-time Transcription",
+				"description": "Our highly accurate speech recognition engine converts meeting discussions into text in real-time, preventing you from missing anything."
+			},
+			"summary": {
+				"title": "Smart Summarization",
+				"description": "AI instantly summarizes even lengthy meetings, allowing you to grasp only the key points in a short time."
+			},
+			"tasks": {
+				"title": "Automatic Task Extraction",
+				"description": "Automatically detects 'to-dos' from conversations and lists them as action items."
+			}
+		}
+	},
+	"cta": {
+		"title": {
+			"line1": "Want to maximize your team's productivity",
+			"line2": "with AI?"
+		},
+		"description": {
+			"line1": "Implement AI Minutes now and transform the way you meet.",
+			"line2": "Experience its effectiveness with a 14-day free trial."
+		},
+		"button": "Try It for Free"
+	},
+	"login": {
+		"title": "Welcome Back",
+		"subtitle": "Sign in to continue to AI Minutes",
+		"google": "Sign in with Google"
+	},
+	"footer": {
+		"copyright": "© 2025 nanasi-apps.xyz All rights reserved.",
+		"privacy": "Privacy Policy",
+		"terms": "Terms of Service",
+		"contact": "Contact Us"
+	},
+	"dashboard": {
+		"overview": "Overview",
+		"meetings": "Meetings",
+		"settings": "Settings"
+	},
+	"sidebar": {
+		"overview": "Overview",
+		"meetings": "Meetings",
+		"settings": "Settings"
+	}
+}
