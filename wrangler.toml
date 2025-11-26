@@ -1,0 +1,19 @@
+name = "example"
+
+main = "./.output/server/index.mjs"
+
+compatibility_date = "2025-11-25"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "test-db"
+database_id = "338991c1-43fe-4de0-b57f-0cf82cb90c40"
+remote = true
+
+[observability]
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+persist = true

@@ -1,0 +1,12 @@
+{
+	"extends": "../.nuxt/tsconfig.server.json",
+	"compilerOptions": {
+		"paths": {
+			"~server/*": ["./*"],
+			"~app/*": ["../app/*"],
+			"@/*": ["../*"],
+			"#/*": ["../shared/*"]
+		}
+	},
+	"include": ["**", "../worker-configuration.d.ts"]
+}

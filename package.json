@@ -1,0 +1,48 @@
+{
+	"name": "nuxt-app",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "prisma generate && nuxt build",
+		"dev": "nuxt dev",
+		"generate": "prisma generate && nuxt generate",
+		"preview": "nuxt preview",
+		"postinstall": "nuxt prepare",
+		"lint-format": "biome check",
+		"lint-format:fix": "biome check --write",
+		"prisma:generate": "prisma generate",
+		"db:push": "prisma db push",
+		"db:migrate:create": "node scripts/db-migrate.mjs create",
+		"db:migrate:generate": "prisma migrate diff --from-local-d1 --to-schema ./prisma/schema.prisma --script --output",
+		"db:migrate:local": "node scripts/db-migrate.mjs apply --local",
+		"db:migrate:remote": "node scripts/db-migrate.mjs apply --remote",
+		"db:migrate:status": "node scripts/db-migrate.mjs list",
+		"deploy": "pnpm build && wrangler deploy",
+		"cf-typegen": "wrangler types",
+		"prepare": "husky",
+		"typecheck": "nuxt typecheck"
+	},
+	"dependencies": {
+		"@orpc/client": "^1.11.3",
+		"@orpc/contract": "^1.11.3",
+		"@orpc/server": "^1.11.3",
+		"@prisma/adapter-d1": "^7.0.1",
+		"@prisma/client": "7.0.1",
+		"@tailwindcss/vite": "^4.1.17",
+		"dotenv": "^17.2.3",
+		"nitro-cloudflare-dev": "^0.2.2",
+		"nuxt": "^4.2.1",
+		"tailwindcss": "^4.1.17",
+		"vue": "^3.5.25",
+		"vue-router": "^4.6.3",
+		"vue-tsc": "^3.1.5",
+		"wrangler": "^4.50.0",
+		"zod": "^4.1.13"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.7",
+		"@types/node": "^24.10.1",
+		"husky": "^9.1.7",
+		"prisma": "^7.0.1"
+	}
+}

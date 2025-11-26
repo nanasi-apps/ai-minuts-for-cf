@@ -1,0 +1,9 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../server/prisma-client"
+  runtime  = "workerd"
+}
+
+datasource db {
+  provider = "sqlite"
+}
