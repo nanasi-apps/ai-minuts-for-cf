@@ -8,8 +8,8 @@ export default defineEventHandler(async (event) => {
 	// Get D1 binding from Cloudflare context
 	const { cloudflare } = event.context;
 	const d1 = cloudflare?.env?.DB as D1Database;
-    const ai = cloudflare?.env?.AI as Ai;
-    
+	const ai = cloudflare?.env?.AI as Ai;
+
 	if (!d1) {
 		setResponseStatus(event, 500, "Database not configured");
 		return "Database binding (DB) not found in Cloudflare environment";
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
 		prefix: "/rpc",
 		context: {
 			db: prisma,
-            ai: ai,
+			ai: ai,
 		},
 	});
 
