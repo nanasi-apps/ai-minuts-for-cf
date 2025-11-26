@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import Button from "@/app/components/general/Button.vue";
+import FileInput from "@/app/components/dashboard/FileInput.vue";
 
 definePageMeta({
+	title: "minuts",
 	layout: "dashboard",
 });
 </script>
 
 <template>
-  <h1>{{ $t('minuts') }}</h1>
-  <Button>
-    アップロードする
-  </Button>
+  <FileInput />
 </template>
 
 <style scoped>
