@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { authMiddleware } from "@/server/middlewares/auth";
 import { os } from "@/server/orpc/os";
+import { OrganizationRole } from "@/server/prisma-client/client";
 
 export default {
 	create: os.organizations.create
@@ -30,7 +31,7 @@ export default {
 					data: {
 						organizationId: newOrg.id,
 						userId: userId,
-						role: "OWNER",
+						role: OrganizationRole.OWNER,
 					},
 				});
 
@@ -54,7 +55,11 @@ export default {
 				},
 			});
 
-			if (!member || (member.role !== "OWNER" && member.role !== "ADMIN")) {
+			if (
+				!member ||
+				(member.role !== OrganizationRole.OWNER &&
+					member.role !== OrganizationRole.ADMIN)
+			) {
 				throw new ORPCError("FORBIDDEN", {
 					message: "You do not have permission to invite members",
 				});
@@ -104,7 +109,7 @@ export default {
 				data: {
 					organizationId: input.organizationId,
 					email: input.email,
-					role: input.role,
+					role: input.role as OrganizationRole,
 					token,
 					expiresAt,
 				},
@@ -130,7 +135,7 @@ export default {
 				},
 			});
 
-			if (!requester || requester.role !== "OWNER") {
+			if (!requester || requester.role !== OrganizationRole.OWNER) {
 				throw new ORPCError("FORBIDDEN", {
 					message: "Only OWNER can add co-administrators",
 				});
@@ -156,7 +161,7 @@ export default {
 					id: targetMember.id,
 				},
 				data: {
-					role: "ADMIN",
+					role: OrganizationRole.ADMIN,
 				},
 			});
 

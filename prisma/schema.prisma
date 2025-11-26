@@ -54,6 +54,13 @@ model Account {
   @@unique([provider, providerId])
 }
 
+/// 組織での役割
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
 /// 組織テーブル
 model Organization {
   id        Int      @id @default(autoincrement())
@@ -68,12 +75,12 @@ model Organization {
 
 /// 組織メンバーテーブル
 model OrganizationMember {
-  id             Int          @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   organizationId Int
   userId         Int
-  role           String       // "OWNER", "ADMIN", "MEMBER"
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  role           OrganizationRole
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -83,13 +90,13 @@ model OrganizationMember {
 
 /// 組織招待テーブル
 model OrganizationInvitation {
-  id             Int          @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   organizationId Int
   email          String
-  role           String       // "ADMIN", "MEMBER"
-  token          String       @unique
+  role           OrganizationRole
+  token          String           @unique
   expiresAt      DateTime
-  createdAt      DateTime     @default(now())
+  createdAt      DateTime         @default(now())
   
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
