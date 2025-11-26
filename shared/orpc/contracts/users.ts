@@ -7,7 +7,7 @@ import * as z from "zod";
  */
 const userSchema = z.object({
 	id: z.number(),
-	email: z.string().email(),
+	email: z.email(),
 	name: z.string().nullable(),
 	avatarUrl: z.string().url().nullable(),
 	bio: z.string().nullable(),
@@ -21,7 +21,7 @@ const userSchema = z.object({
  */
 const updateProfileInputSchema = z.object({
 	name: z.string().min(1).max(100).optional(),
-	avatarUrl: z.string().url().optional(),
+	avatarUrl: z.url().optional(),
 	bio: z.string().max(500).optional(),
 });
 
