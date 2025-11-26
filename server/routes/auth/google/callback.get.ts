@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
 
 	try {
 		const googleUser = await getGoogleUser(code);
+		// biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: 無かったら無い方が悪い
 		const prisma = createPrismaClient(event.context.cloudflare?.env?.DB!);
 		// Find or create user
 		let user = await prisma.user.findUnique({
@@ -37,26 +38,29 @@ export default defineEventHandler(async (event) => {
 
 			// Auto-join organizations
 			const domain = googleUser.email.split("@")[1];
-			const organizations = await prisma.organization.findMany({
-				where: {
-					allowedDomains: {
-						contains: domain,
-					},
-				},
-			});
-
-			for (const org of organizations) {
-				// Check if domain is actually allowed (exact match or comma separated)
-				const allowedDomains =
-					org.allowedDomains?.split(",").map((d) => d.trim()) || [];
-				if (allowedDomains.includes(domain)) {
-					await prisma.organizationMember.create({
-						data: {
-							organizationId: org.id,
-							userId: user.id,
-							role: "MEMBER",
+			if (domain) {
+				const organizations = await prisma.organization.findMany({
+					where: {
+						allowedDomains: {
+							contains: domain,
 						},
-					});
+					},
+				});
+
+				for (const org of organizations) {
+					// Check if domain is actually allowed (exact match or comma separated)
+					const allowedDomains = org.allowedDomains
+						? org.allowedDomains.split(",").map((d) => d.trim())
+						: [];
+					if (allowedDomains.includes(domain)) {
+						await prisma.organizationMember.create({
+							data: {
+								organizationId: org.id,
+								userId: user.id,
+								role: "MEMBER",
+							},
+						});
+					}
 				}
 			}
 		} else {
@@ -99,7 +103,7 @@ export default defineEventHandler(async (event) => {
 			path: "/",
 		});
 
-		return sendRedirect(event, "/");
+		return sendRedirect(event, "/", 302);
 	} catch (error) {
 		console.error("Google OAuth error:", error);
 		throw createError({

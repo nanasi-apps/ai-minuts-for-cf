@@ -1,12 +1,25 @@
 {
 	"extends": "../.nuxt/tsconfig.server.json",
 	"compilerOptions": {
+		"baseUrl": ".",
 		"paths": {
-			"~server/*": ["./*"],
-			"~app/*": ["../app/*"],
-			"@/*": ["../*"],
-			"#/*": ["../shared/*"]
+			"~server/*": [
+				"./*"
+			],
+			"~app/*": [
+				"../app/*"
+			],
+			"@/*": [
+				"../*"
+			],
+			"#/*": [
+				"../shared/*"
+			]
 		}
 	},
-	"include": ["**", "../worker-configuration.d.ts"]
+	"include": [
+		"**/*",
+		"../worker-configuration.d.ts",
+		"../.nuxt/types/nitro.d.ts"
+	]
 }

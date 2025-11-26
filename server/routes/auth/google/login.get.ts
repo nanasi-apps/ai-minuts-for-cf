@@ -1,6 +1,6 @@
 import { getGoogleAuthUrl } from "@/server/utils/auth";
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
 	const url = getGoogleAuthUrl();
-	return sendRedirect(event, url);
+	return sendRedirect(event, url, 302);
 });

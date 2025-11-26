@@ -51,7 +51,7 @@ export const getGoogleUser = async (code: string): Promise<GoogleUser> => {
 		throw new Error("Failed to fetch Google token");
 	}
 
-	const { access_token } = await tokenResponse.json();
+	const { access_token } = (await tokenResponse.json()) as { access_token: string };
 
 	const userResponse = await fetch(GOOGLE_USERINFO_URL, {
 		headers: {

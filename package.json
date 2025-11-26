@@ -13,7 +13,7 @@
 		"prisma:generate": "prisma generate",
 		"db:push": "prisma db push",
 		"db:migrate:create": "node scripts/db-migrate.mjs create",
-		"db:migrate:generate": "prisma migrate diff --from-local-d1 --to-schema ./prisma/schema.prisma --script --output",
+		"db:migrate:generate": "prisma migrate diff --from-config-datasource --to-schema ./prisma/schema.prisma --script --output",
 		"db:migrate:local": "node scripts/db-migrate.mjs apply --local",
 		"db:migrate:remote": "node scripts/db-migrate.mjs apply --remote",
 		"db:migrate:status": "node scripts/db-migrate.mjs list",
