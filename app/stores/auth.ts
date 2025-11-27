@@ -1,4 +1,5 @@
 import { Store } from "@tanstack/vue-store";
+import { useApi } from "@/app/composable/useApi";
 
 interface User {
 	id: number;
@@ -39,8 +40,10 @@ export const setLoading = (isLoading: boolean) => {
 export const checkSession = async () => {
 	setLoading(true);
 	try {
-		const { $api } = useNuxtApp();
-		const { user } = await ($api as any).auth.me();
+		console.log("Checking session...");
+		const api = useApi();
+		const { user } = await api.auth.me();
+		console.log("Session valid, user:", user);
 		setUser(user);
 	} catch (error) {
 		console.error("Failed to check session:", error);
@@ -50,13 +53,14 @@ export const checkSession = async () => {
 	}
 };
 
-export const logout = async () => {
+export const logout = () => {
 	try {
-		const { $api } = useNuxtApp();
-		await ($api as any).auth.logout();
-		const router = useRouter();
+		// Clear local storage
+		if (import.meta.client) {
+			localStorage.removeItem("session_token");
+		}
+
 		setUser(null);
-		await router.push("/");
 	} catch (error) {
 		console.error("Failed to logout:", error);
 	}

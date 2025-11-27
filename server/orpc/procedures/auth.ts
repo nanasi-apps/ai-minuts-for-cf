@@ -1,22 +1,13 @@
+import { authMiddleware } from "@/server/middlewares/auth";
 import type { ORPCContext } from "@/server/orpc/os";
 import { os } from "@/server/orpc/os";
-import { verifySessionToken } from "@/server/utils/auth";
 
 export default {
-	me: os.auth.me.handler(async ({ context }: { context: ORPCContext }) => {
-		const token = getCookie(context.event, "session_token");
-
-		if (!token) {
-			return { user: null };
-		}
-
-		const payload = await verifySessionToken(token);
-		if (!payload) {
-			return { user: null };
-		}
+	me: os.auth.me.use(authMiddleware).handler(async ({ context }) => {
+		const userId = context.userId;
 
 		const user = await context.db.user.findUnique({
-			where: { id: payload.userId },
+			where: { id: userId },
 			select: {
 				id: true,
 				email: true,

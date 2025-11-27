@@ -11,6 +11,13 @@ export default defineNuxtConfig({
 
 	compatibilityDate: "2025-11-25",
 
+	runtimeConfig: {
+		r2AccountId: process.env.NUXT_R2_ACCOUNT_ID,
+		r2AccessKeyId: process.env.NUXT_R2_ACCESS_KEY_ID,
+		r2SecretAccessKey: process.env.NUXT_R2_SECRET_ACCESS_KEY,
+		r2BucketName: process.env.NUXT_R2_BUCKET_NAME,
+	},
+
 	i18n: {
 		defaultLocale: "ja",
 		locales: [

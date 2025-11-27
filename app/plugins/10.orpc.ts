@@ -17,7 +17,7 @@ export default defineNuxtPlugin((_nuxtApp) => {
 			let token: string | null = null;
 			if (import.meta.client) {
 				try {
-					token = localStorage.getItem("access_token");
+					token = localStorage.getItem("session_token");
 				} catch (error) {
 					console.warn("Failed to access localStorage:", error);
 				}

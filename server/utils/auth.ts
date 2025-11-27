@@ -1,13 +1,10 @@
-import { jwtVerify, SignJWT } from "jose";
+
 
 const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 
-const JWT_SECRET = new TextEncoder().encode(
-	process.env.JWT_SECRET || "default-secret-change-me",
-);
-const ALG = "HS256";
+
 
 export interface GoogleUser {
 	id: string;
@@ -68,19 +65,20 @@ export const getGoogleUser = async (code: string): Promise<GoogleUser> => {
 	return userResponse.json();
 };
 
+import { SignJWT } from "jose";
+
+// ...
+
 export const createSessionToken = async (userId: number) => {
+	const secret = new TextEncoder().encode(
+		process.env.JWT_SECRET || "default-secret-change-me",
+	);
+
 	return new SignJWT({ userId })
-		.setProtectedHeader({ alg: ALG })
+		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
 		.setExpirationTime("7d")
-		.sign(JWT_SECRET);
+		.sign(secret);
 };
 
-export const verifySessionToken = async (token: string) => {
-	try {
-		const { payload } = await jwtVerify(token, JWT_SECRET);
-		return payload as { userId: number };
-	} catch (e) {
-		return null;
-	}
-};
+

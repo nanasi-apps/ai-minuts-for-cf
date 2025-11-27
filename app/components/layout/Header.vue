@@ -15,6 +15,11 @@ const goToLogin = () => {
 const goToDashboard = () => {
 	router.push("/dashboard");
 };
+
+const handleLogout = () => {
+	logout();
+	window.location.href = "/login";
+};
 </script>
 
 <template>
@@ -38,7 +43,7 @@ const goToDashboard = () => {
             <div v-else class="w-8 h-8 rounded-full bg-mattya-100 dark:bg-mattya-900 flex items-center justify-center text-mattya-600 dark:text-mattya-400 font-bold">
               {{ user.name.charAt(0) }}
             </div>
-            <Button variant="secondary" @click="logout" class="!px-3 !py-1 !text-xs">{{ $t('header.logout') }}</Button>
+            <Button variant="secondary" @click="handleLogout" class="!px-3 !py-1 !text-xs">{{ $t('header.logout') }}</Button>
           </template>
           <template v-else>
             <Button @click="goToLogin()">{{ $t('header.login') }}</Button>

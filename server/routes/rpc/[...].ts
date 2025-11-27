@@ -10,7 +10,9 @@ export default defineEventHandler(async (event) => {
 	const d1 = cloudflare?.env?.ai_minuts as D1Database;
 	const ai = cloudflare?.env?.AI as Ai;
 	// JWT署名・検証用の秘密鍵（wrangler secret で設定）
-	const jwtSecret = cloudflare?.env?.JWT_SECRET as string | undefined;
+	const jwtSecret =
+		(cloudflare?.env?.JWT_SECRET as string | undefined) ||
+		process.env.JWT_SECRET;
 
 	if (!d1) {
 		setResponseStatus(event, 500, "Database not configured");

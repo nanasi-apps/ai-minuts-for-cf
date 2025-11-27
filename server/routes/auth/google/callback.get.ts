@@ -107,14 +107,8 @@ export default defineEventHandler(async (event) => {
 
 		const token = await createSessionToken(user.id);
 
-		setCookie(event, "session_token", token, {
-			httpOnly: true,
-			secure: process.env.NODE_ENV === "production",
-			maxAge: 60 * 60 * 24 * 7, // 7 days
-			path: "/",
-		});
-
-		return sendRedirect(event, "/", 302);
+		// Redirect to client callback page with token
+		return sendRedirect(event, `/auth/callback?token=${token}`, 302);
 	} catch (error) {
 		console.error("Google OAuth error:", error);
 		throw createError({

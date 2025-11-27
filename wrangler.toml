@@ -21,3 +21,7 @@ persist = true
 [ai]
 binding = "AI"
 remote = true
+
+[[r2_buckets]]
+bucket_name = "minuts-videos"
+binding = "minuts_videos"
