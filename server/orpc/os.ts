@@ -9,6 +9,7 @@ import type { PrismaClient } from "@/server/prisma-client/client";
  */
 export interface ORPCContext {
 	db: PrismaClient;
+	r2: R2Bucket;
 	ai: Ai;
 	/** 認証ヘッダー（Authorization: Bearer xxx） */
 	authHeader?: string;

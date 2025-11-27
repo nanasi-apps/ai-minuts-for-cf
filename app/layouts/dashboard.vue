@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Sidebar from "@/app/components/dashboard/sidebar/Sidebar.vue";
+import UiToastContainer from "@/app/components/ui/ToastContainer.vue";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -32,6 +33,7 @@ const title = computed(() => t((route.meta?.title as string) ?? "dashboard"));
       </h1>
       <slot />
     </main>
+    <UiToastContainer />
   </div>
 </template>
 

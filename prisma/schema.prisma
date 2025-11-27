@@ -29,6 +29,9 @@ model User {
 
   /// 所属する組織
   memberships OrganizationMember[]
+
+  /// 議事録
+  minuts      Minuts[]
 }
 
 /// 認証アカウントテーブル
@@ -106,3 +109,15 @@ model OrganizationInvitation {
   @@unique([organizationId, email])
 }
 
+
+/// 議事録テーブル
+model Minuts {
+  id        Int      @id @default(autoincrement())
+  title     String
+  videoKey  String
+  status    String   @default("UPLOADING") // UPLOADING, PROCESSING, COMPLETED, FAILED
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

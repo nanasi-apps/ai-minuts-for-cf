@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import FileInput from "@/app/components/dashboard/FileInput.vue";
 import { useApi } from "@/app/composable/useApi";
+import { useToast } from "@/app/composables/useToast";
 
 definePageMeta({
 	title: "minuts",
@@ -9,6 +10,8 @@ definePageMeta({
 });
 
 const api = useApi();
+const { addToast } = useToast();
+const router = useRouter();
 const isUploading = ref(false);
 const uploadProgress = ref(0);
 const errorMessage = ref<string | null>(null);
@@ -29,7 +32,7 @@ const handleFileSelect = async (file: File) => {
 
 	try {
 		// 1. Generate Presigned URL
-		const { uploadUrl } = await api.minuts.generatePresignedUrl({
+		const { uploadUrl, minutsId } = await api.minuts.generatePresignedUrl({
 			filename: file.name,
 			contentType: file.type as "video/mp4" | "audio/mpeg",
 			fileSize: file.size,
@@ -38,12 +41,18 @@ const handleFileSelect = async (file: File) => {
 		// 2. Upload to R2
 		await uploadToR2(uploadUrl, file);
 
-		// 3. Notify success
-		// TODO: Navigate to details page or show success state
-		alert("アップロードが完了しました！");
+        // 3. Process
+        await api.minuts.process({ minutsId });
+
+		// 4. Notify success
+		addToast("アップロードが完了しました！", "success");
+
+        // 5. Redirect
+        router.push(`/minuts/${minutsId}`);
 	} catch (e: any) {
 		console.error(e);
 		errorMessage.value = e.message || "アップロードに失敗しました";
+        addToast("アップロードに失敗しました", "error");
 	} finally {
 		isUploading.value = false;
 	}

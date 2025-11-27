@@ -9,6 +9,7 @@ export default defineEventHandler(async (event) => {
 	const { cloudflare } = event.context;
 	const d1 = cloudflare?.env?.ai_minuts as D1Database;
 	const ai = cloudflare?.env?.AI as Ai;
+	const r2 = cloudflare?.env?.minuts_videos as R2Bucket;
 	// JWT署名・検証用の秘密鍵（wrangler secret で設定）
 	const jwtSecret =
 		(cloudflare?.env?.JWT_SECRET as string | undefined) ||
@@ -30,6 +31,7 @@ export default defineEventHandler(async (event) => {
 		context: {
 			db: prisma,
 			ai: ai,
+			r2: r2,
 			authHeader: authHeader,
 			jwtSecret: jwtSecret,
 			event: event,

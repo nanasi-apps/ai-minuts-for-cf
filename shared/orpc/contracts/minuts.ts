@@ -13,22 +13,40 @@ const generatePresignedUrl = oc
 		z.object({
 			uploadUrl: z.string().url(),
 			key: z.string(),
+			minutsId: z.number(),
 		}),
 	);
 
 const list = oc.route({ path: "/list", method: "GET" }).output(
 	z.array(
 		z.object({
-			id: z.string(),
+			id: z.number(),
 			title: z.string(),
-			date: z.string(),
-			durationMinutes: z.number(),
-			expiresAt: z.string(),
+			status: z.string(),
+			createdAt: z.string(),
 		}),
 	),
 );
 
+const process = oc
+	.route({
+		path: "/process",
+		method: "POST",
+	})
+	.input(
+		z.object({
+			minutsId: z.number(),
+		}),
+	)
+	.output(
+		z.object({
+			success: z.boolean(),
+			message: z.string().optional(),
+		}),
+	);
+
 export const minuts = oc.prefix("/minuts").router({
 	generatePresignedUrl,
 	list,
+	process,
 });

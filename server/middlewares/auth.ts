@@ -36,7 +36,6 @@ export const authMiddleware = os.middleware(async ({ context, next }) => {
 			message: "JWT秘密鍵が設定されていません",
 		});
 	}
-
 	if (!authHeader) {
 		throw new ORPCError("UNAUTHORIZED", {
 			message: "認証が必要です",
@@ -72,4 +71,3 @@ export const authMiddleware = os.middleware(async ({ context, next }) => {
 		});
 	}
 });
-
