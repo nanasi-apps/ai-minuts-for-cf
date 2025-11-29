@@ -1,16 +1,16 @@
 <script setup lang="ts">
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Button from "@/app/components/general/Button.vue";
 
 interface Props {
-  summary: string;
-  isProcessing?: boolean;
+	summary: string;
+	isProcessing?: boolean;
 }
 
 defineProps<Props>();
 
-const emit = defineEmits<{
-  (e: 'regenerate'): void
-}>();
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
+const emit = defineEmits<(e: "regenerate") => void>();
 </script>
 
 <template>

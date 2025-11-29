@@ -7,7 +7,7 @@ export default {
 	async fetch(
 		request: Request,
 		env: Env,
-		ctx: ExecutionContext,
+		_ctx: ExecutionContext,
 	): Promise<Response> {
 		const url = new URL(request.url);
 
@@ -46,7 +46,7 @@ export default {
 		return new Response("Worker is running", { status: 200 });
 	},
 
-	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+	async scheduled(_event: ScheduledEvent, _env: Env, _ctx: ExecutionContext) {
 		// No-op: Scheduling is now handled by Durable Object Alarms
 	},
 };

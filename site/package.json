@@ -8,8 +8,6 @@
 		"generate": "prisma generate && nuxt generate && pnpm cf-typegen",
 		"preview": "nuxt preview",
 		"postinstall": "nuxt prepare",
-		"lint-format": "biome check",
-		"lint-format:fix": "biome check --write",
 		"prisma:generate": "prisma generate",
 		"db:push": "prisma db push",
 		"db:migrate:create": "node scripts/db-migrate.mjs create",
@@ -20,7 +18,6 @@
 		"db:migrate:status:remote": "node scripts/db-migrate.mjs list --remote",
 		"deploy": "pnpm build && wrangler deploy",
 		"cf-typegen": "wrangler types",
-		"prepare": "husky",
 		"typecheck": "nuxt typecheck"
 	},
 	"dependencies": {
@@ -35,6 +32,7 @@
 		"@tailwindcss/vite": "^4.1.17",
 		"@tanstack/vue-store": "^0.8.0",
 		"dotenv": "^17.2.3",
+		"h3": "^1.13.0",
 		"jose": "^6.1.2",
 		"nitro-cloudflare-dev": "^0.2.2",
 		"nuxt": "^4.2.1",
@@ -47,7 +45,6 @@
 	"devDependencies": {
 		"@types/node": "^24.10.1",
 		"@vue/language-server": "^3.1.5",
-		"husky": "^9.1.7",
 		"prisma": "^7.0.1"
 	},
 	"packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"

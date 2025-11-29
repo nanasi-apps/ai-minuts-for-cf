@@ -1,8 +1,11 @@
 <script setup lang="ts">
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Footer from "@/app/components/layout/Footer.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Header from "@/app/components/layout/Header.vue";
 
 const nowUrl = useRoute().fullPath;
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const isExcluded = !nowUrl.startsWith("/dashboard");
 </script>
 

@@ -2,19 +2,22 @@
 import { computed } from "vue";
 
 const props = withDefaults(
-  defineProps<{
-    icon?: string;
-    title: string;
-    description?: string;
-    variant?: "default" | "error";
-  }>(),
-  {
-    variant: "default",
-  },
+	defineProps<{
+		icon?: string;
+		title: string;
+		description?: string;
+		variant?: "default" | "error";
+	}>(),
+	{
+		variant: "default",
+	},
 );
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const variantClass = computed(() => {
-  return props.variant === "error" ? "state-panel--error" : "state-panel--default";
+	return props.variant === "error"
+		? "state-panel--error"
+		: "state-panel--default";
 });
 </script>
 
