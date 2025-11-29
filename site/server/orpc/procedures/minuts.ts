@@ -86,15 +86,15 @@ export default {
 				});
 			}
 
-                        // Enqueue job to Worker
-                        const cfEnv = context.event.context.cloudflare?.env;
-                        if (!cfEnv || typeof cfEnv !== "object" || !("QUEUE_SERVICE" in cfEnv)) {
-                                throw new ORPCError("INTERNAL_SERVER_ERROR", {
-                                        message: "Queue service binding is missing.",
-                                });
-                        }
+			// Enqueue job to Worker
+			const cfEnv = context.event.context.cloudflare?.env;
+			if (!cfEnv || typeof cfEnv !== "object" || !("QUEUE_SERVICE" in cfEnv)) {
+				throw new ORPCError("INTERNAL_SERVER_ERROR", {
+					message: "Queue service binding is missing.",
+				});
+			}
 
-                        const { QUEUE_SERVICE } = cfEnv as { QUEUE_SERVICE: Fetcher };
+			const { QUEUE_SERVICE } = cfEnv as { QUEUE_SERVICE: Fetcher };
 
 			const payload = {
 				minutsId,
@@ -163,14 +163,14 @@ export default {
 				});
 			}
 
-                        const cfEnv = context.event.context.cloudflare?.env;
-                        if (!cfEnv || typeof cfEnv !== "object" || !("QUEUE_SERVICE" in cfEnv)) {
-                                throw new ORPCError("INTERNAL_SERVER_ERROR", {
-                                        message: "Queue service binding is missing.",
-                                });
-                        }
+			const cfEnv = context.event.context.cloudflare?.env;
+			if (!cfEnv || typeof cfEnv !== "object" || !("QUEUE_SERVICE" in cfEnv)) {
+				throw new ORPCError("INTERNAL_SERVER_ERROR", {
+					message: "Queue service binding is missing.",
+				});
+			}
 
-                        const { QUEUE_SERVICE } = cfEnv as { QUEUE_SERVICE: Fetcher };
+			const { QUEUE_SERVICE } = cfEnv as { QUEUE_SERVICE: Fetcher };
 
 			const payload = {
 				minutsId,

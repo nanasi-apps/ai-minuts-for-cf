@@ -105,8 +105,8 @@ List only unresolved questions mentioned in the transcript.
 `;
 
 export async function summarizeTranscript(
-        ai: AiBinding,
-        transcript: string,
+	ai: AiBinding,
+	transcript: string,
 ): Promise<string> {
 	const llmResponse = await ai.run("@cf/meta/llama-3-8b-instruct", {
 		messages: [
