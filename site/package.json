@@ -8,8 +8,6 @@
 		"generate": "prisma generate && nuxt generate && pnpm cf-typegen",
 		"preview": "nuxt preview",
 		"postinstall": "nuxt prepare",
-		"lint-format": "biome check",
-		"lint-format:fix": "biome check --write",
 		"prisma:generate": "prisma generate",
 		"db:push": "prisma db push",
 		"db:migrate:create": "node scripts/db-migrate.mjs create",

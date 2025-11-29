@@ -6,13 +6,11 @@
 		"dev:site": "pnpm --filter ./site dev",
 		"dev:workers": "pnpm --filter ./workers dev",
 		"prisma:generate": "pnpm --filter ./site prisma:generate",
-		"lint-format": "pnpm check",
-		"lint-format:fix": "pnpm format",
 		"deploy:site": "pnpm --filter ./site deploy",
 		"deploy:workers": "pnpm --filter ./workers deploy",
 		"typecheck": "pnpm -r typecheck",
-		"check": "biome check .",
-		"format": "biome check --write .",
+		"lint-format": "biome check",
+		"lint-format:fix": "biome check --write",
 		"prepare": "husky"
 	},
 	"dependencies": {
