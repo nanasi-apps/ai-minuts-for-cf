@@ -39,7 +39,7 @@ export const setLoading = (isLoading: boolean) => {
 export const useSession = () => {
 	return useAsyncApi<Outputs["auth"]["me"]>((api) => api.auth.me(), {
 		key: "api:auth:me",
-		server: true,
+		server: false,
 		dedupe: "defer",
 	});
 };
@@ -74,9 +74,6 @@ export const logout = () => {
 		if (import.meta.client) {
 			localStorage.removeItem("session_token");
 		}
-
-		const token = useCookie("session_token");
-		token.value = null;
 
 		setUser(null);
 	} catch (error) {

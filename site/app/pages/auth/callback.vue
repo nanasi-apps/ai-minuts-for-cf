@@ -2,19 +2,14 @@
 // biome-ignore lint/correctness/noUnusedImports: used in the template
 import AuthShell from "@/app/components/layout/AuthShell.vue";
 
-const route = useRoute();
-const router = useRouter();
-
-const tokenCookie = useCookie("session_token");
-
 onMounted(async () => {
+	const router = useRouter();
+	const route = useRoute();
+
 	const token = route.query.token as string;
 
 	if (token) {
-		// Save token to cookie for SSR support
-		tokenCookie.value = token;
-		
-		// Also save to localStorage for client-side compatibility if needed
+		// Save token to localStorage
 		localStorage.setItem("session_token", token);
 
 		// Redirect to dashboard with hard reload to ensure clean state and auth initialization
