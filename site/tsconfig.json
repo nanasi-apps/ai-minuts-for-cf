@@ -1,11 +1,12 @@
 {
 	// https://nuxt.com/docs/guide/concepts/typescript
-	"extends": "./.nuxt/tsconfig.json",
-	"compilerOptions": {
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["./*"],
-			"#/*": ["./shared/*"]
-		}
-	}
+        "extends": "./.nuxt/tsconfig.json",
+        "compilerOptions": {
+                "baseUrl": ".",
+                "types": ["./types/prisma-client"],
+                "paths": {
+                        "@/*": ["./*"],
+                        "#/*": ["./shared/*"]
+                }
+        }
 }

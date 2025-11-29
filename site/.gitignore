@@ -24,4 +24,5 @@ logs
 !.env.example
 
 prisma-client
-.wrangler
+# Keep generated Prisma client local only
+server/prisma-client/

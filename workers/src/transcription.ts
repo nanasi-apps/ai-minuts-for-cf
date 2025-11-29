@@ -1,9 +1,19 @@
-import { Buffer } from "node:buffer";
-
 const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB chunks
 const MAX_CHUNK_RETRIES = 3;
 const RETRY_DELAY_MS = 3000;
 const INTER_CHUNK_DELAY_MS = 500;
+
+const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+
+        const chunkSize = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+                binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+        }
+
+        return btoa(binary);
+};
 
 interface TranscriptionSegment {
         start: number;
@@ -37,7 +47,7 @@ export async function transcribeAudio(object: R2ObjectBody, ai: any): Promise<st
                 console.log(`[Transcription] Processing chunk ${chunkIndex}/${totalChunks}...`);
 
                 const chunk = audioBuffer.slice(i, i + CHUNK_SIZE);
-                const base64Audio = Buffer.from(chunk).toString("base64");
+                const base64Audio = arrayBufferToBase64(chunk);
 
                 let chunkSuccess = false;
                 let attempt = 0;

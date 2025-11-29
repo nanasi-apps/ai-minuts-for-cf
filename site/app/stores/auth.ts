@@ -1,16 +1,15 @@
 import { Store } from "@tanstack/vue-store";
-import { useApi } from "@/app/composable/useApi";
+import type { InferContractRouterOutputs } from "@orpc/contract";
+import type { contract } from "#/orpc";
 
-interface User {
-	id: number;
-	email: string;
-	name: string;
-	picture?: string;
-}
+import { useAsyncApi } from "@/app/composable/useApi";
+
+type Outputs = InferContractRouterOutputs<typeof contract>;
+type User = NonNullable<Outputs["auth"]["me"]["user"]>;
 
 interface AuthState {
-	user: User | null;
-	isLoading: boolean;
+        user: User | null;
+        isLoading: boolean;
 }
 
 export const authStore = new Store<AuthState>({
@@ -29,27 +28,46 @@ export const setUser = (user: User | null) => {
 };
 
 export const setLoading = (isLoading: boolean) => {
-	authStore.setState((state) => {
-		return {
-			...state,
-			isLoading,
-		};
-	});
+        authStore.setState((state) => {
+                return {
+                        ...state,
+                        isLoading,
+                };
+        });
+};
+
+export const useSession = () => {
+        return useAsyncApi<Outputs["auth"]["me"]>(
+                (api) => api.auth.me(),
+                {
+                        key: "api:auth:me",
+                        server: true,
+                        dedupe: "defer",
+                },
+        );
 };
 
 export const checkSession = async () => {
-	setLoading(true);
-	try {
-		console.log("Checking session...");
-		const api = useApi();
-		const { user } = await api.auth.me();
-		console.log("Session valid, user:", user);
-		setUser(user);
-	} catch (error) {
-		console.error("Failed to check session:", error);
-		setUser(null);
-	} finally {
-		setLoading(false);
+        setLoading(true);
+        try {
+                const { data, error, refresh, status } = useSession();
+
+                if (status.value !== "success") {
+                        await refresh();
+                }
+
+                const user = data.value?.user ?? null;
+
+                if (user) {
+                        setUser(user);
+                } else if (error.value || status.value === "success") {
+                        setUser(null);
+                }
+        } catch (error) {
+                console.error("Failed to check session:", error);
+                setUser(null);
+        } finally {
+                setLoading(false);
 	}
 };
 

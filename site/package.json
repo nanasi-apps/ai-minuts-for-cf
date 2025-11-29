@@ -21,7 +21,7 @@
 		"deploy": "pnpm build && wrangler deploy",
 		"cf-typegen": "wrangler types",
 		"prepare": "husky",
-		"typecheck": "nuxt typecheck"
+                "typecheck": "nuxt typecheck"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.940.0",
