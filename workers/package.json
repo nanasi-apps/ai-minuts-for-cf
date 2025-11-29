@@ -2,15 +2,17 @@
 	"name": "workers-queue",
 	"version": "0.0.0",
 	"private": true,
-	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
-		"typecheck": "tsc --noEmit",
-		"cf-typegen": "wrangler types"
-	},
-	"dependencies": {
-		"hono": "^4.0.0"
-	},
-	"devDependencies": {}
+        "scripts": {
+                "deploy": "wrangler deploy",
+                "dev": "wrangler dev",
+                "start": "wrangler dev",
+                "typecheck": "tsc --noEmit",
+                "cf-typegen": "wrangler types"
+        },
+        "dependencies": {
+                "hono": "^4.0.0"
+        },
+        "devDependencies": {
+                "@types/node": "^24.10.1"
+        }
 }
