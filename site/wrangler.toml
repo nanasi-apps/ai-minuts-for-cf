@@ -1,0 +1,33 @@
+name = "example"
+
+main = "./.output/server/index.mjs"
+
+compatibility_date = "2025-11-25"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "ai_minuts"
+database_name = "ai-minuts"
+database_id = "dbbc20dc-a2f5-4f10-abec-e4d96a05ddb0"
+remote = true
+
+[observability]
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+persist = true
+
+[ai]
+binding = "AI"
+remote = true
+
+[[r2_buckets]]
+bucket_name = "minuts-videos"
+binding = "minuts_videos"
+remote = true
+
+[[services]]
+binding = "QUEUE_SERVICE"
+service = "ai-minuts-queue"
+

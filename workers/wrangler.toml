@@ -1,0 +1,37 @@
+name = "ai-minuts-queue"
+main = "src/index.ts"
+compatibility_date = "2025-11-28"
+compatibility_flags = ["nodejs_compat"]
+
+# Durable Object binding
+[[durable_objects.bindings]]
+name = "QUEUE_DO"
+class_name = "QueueDO"
+
+# Durable Object migration
+[[migrations]]
+tag = "v1"
+new_classes = ["QueueDO"]
+
+# KV Namespace binding (Placeholder)
+# D1 Database binding
+[[d1_databases]]
+binding = "ai_minuts"
+database_name = "ai-minuts"
+database_id = "dbbc20dc-a2f5-4f10-abec-e4d96a05ddb0"
+remote = true
+
+# R2 Bucket binding
+[[r2_buckets]]
+binding = "minuts_videos"
+bucket_name = "minuts-videos"
+remote = true
+
+[ai]
+binding = "AI"
+remote = true
+
+
+
+[observability]
+enabled = true
