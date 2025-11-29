@@ -35,8 +35,8 @@ const {
 	status,
 	refresh,
 } = useAsyncApi(() => api.minuts.get({ id: minutsId }), {
-        key: `api:minuts:${minutsId}`,
-        server: true,
+	key: `api:minuts:${minutsId}`,
+	server: true,
 });
 
 // biome-ignore lint/correctness/noUnusedVariables: used in the template

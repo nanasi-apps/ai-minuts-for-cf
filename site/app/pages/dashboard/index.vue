@@ -25,15 +25,15 @@ definePageMeta({
 });
 
 const {
-        data: minutsList,
-        // biome-ignore lint/correctness/noUnusedVariables: used in the template
+	data: minutsList,
+	// biome-ignore lint/correctness/noUnusedVariables: used in the template
 	status,
 	// biome-ignore lint/correctness/noUnusedVariables: used in the template
-        refresh,
+	refresh,
 } = useAsyncApi<MinutsList>((api) => api.minuts.list(), {
-        key: "api:minuts:list",
-        server: true,
-        dedupe: "defer",
+	key: "api:minuts:list",
+	server: true,
+	dedupe: "defer",
 });
 
 // biome-ignore lint/correctness/noUnusedVariables: used in the template

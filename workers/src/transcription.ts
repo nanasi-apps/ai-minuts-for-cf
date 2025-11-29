@@ -1,31 +1,20 @@
 type AiBinding = Env["AI"];
 
-function arrayBufferToBase64(buffer: ArrayBuffer) {
-	let binary = "";
-	const bytes = new Uint8Array(buffer);
-
-	for (let i = 0; i < bytes.byteLength; i++) {
-		binary += String.fromCharCode(bytes[i]);
-	}
-
-	return btoa(binary);
-}
-
 const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB chunks
 const MAX_CHUNK_RETRIES = 3;
 const RETRY_DELAY_MS = 3000;
 const INTER_CHUNK_DELAY_MS = 500;
 
 const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
-        const bytes = new Uint8Array(buffer);
-        let binary = "";
+	const bytes = new Uint8Array(buffer);
+	let binary = "";
 
-        const chunkSize = 0x8000;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-                binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-        }
+	const chunkSize = 0x8000;
+	for (let i = 0; i < bytes.length; i += chunkSize) {
+		binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+	}
 
-        return btoa(binary);
+	return btoa(binary);
 };
 
 interface TranscriptionSegment {
