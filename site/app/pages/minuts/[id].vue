@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Button from "@/app/components/general/Button.vue";
+import PageContainer from "@/app/components/layout/PageContainer.vue";
 import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
+import MinutsDetailSkeleton from "@/app/components/minuts/MinutsDetailSkeleton.vue";
 import SummaryCard from "@/app/components/minuts/SummaryCard.vue";
 import TranscriptCard from "@/app/components/minuts/TranscriptCard.vue";
 import { useApi, useAsyncApi } from "@/app/composable/useApi";
@@ -53,28 +55,20 @@ const regenerateSummary = async () => {
 </script>
 
 <template>
-  <div class="p-8 max-w-4xl mx-auto">
-    <div v-if="status === 'pending'" class="animate-pulse">
-        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-8"></div>
-        <div class="space-y-4">
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-        </div>
-    </div>
+  <PageContainer size="narrow">
+    <MinutsDetailSkeleton v-if="status === 'pending'" />
 
-    <div v-else-if="minuts" class="space-y-8">
-        <div class="flex justify-between items-start">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ minuts.title }}</h1>
-                <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+    <div v-else-if="minuts" class="detail-content">
+        <div class="detail-header">
+            <div class="detail-title">
+                <h1 class="detail-heading">{{ minuts.title }}</h1>
+                <div class="detail-meta">
                     <span>{{ formatDate(minuts.createdAt) }}</span>
                     <StatusBadge :status="minuts.status" />
                 </div>
             </div>
-            
-            <Button 
+
+            <Button
                 v-if="minuts.status === 'UPLOADING' || minuts.status === 'FAILED'"
                 @click="processMinuts"
                 variant="primary"
@@ -83,17 +77,49 @@ const regenerateSummary = async () => {
             </Button>
         </div>
 
-        <SummaryCard 
-            v-if="minuts.summary" 
-            :summary="minuts.summary" 
+        <SummaryCard
+            v-if="minuts.summary"
+            :summary="minuts.summary"
             :is-processing="minuts.status === 'PROCESSING'"
             @regenerate="regenerateSummary"
         />
 
-        <TranscriptCard 
-            v-if="minuts.transcript" 
-            :transcript="minuts.transcript" 
+        <TranscriptCard
+            v-if="minuts.transcript"
+            :transcript="minuts.transcript"
         />
     </div>
-  </div>
+  </PageContainer>
 </template>
+
+<style scoped>
+@reference "@/app/assets/index.css";
+
+.detail-content {
+  @apply space-y-8;
+}
+
+.detail-header {
+  @apply flex justify-between items-start;
+}
+
+.detail-title {
+  @apply space-y-2;
+}
+
+.detail-heading {
+  @apply text-3xl font-bold text-gray-900;
+
+  @media (prefers-color-scheme: dark) {
+    @apply text-white;
+  }
+}
+
+.detail-meta {
+  @apply flex items-center gap-4 text-sm text-gray-500;
+
+  @media (prefers-color-scheme: dark) {
+    @apply text-gray-400;
+  }
+}
+</style>

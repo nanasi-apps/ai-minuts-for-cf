@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AuthShell from "@/app/components/layout/AuthShell.vue";
 import { setUser } from "@/app/stores/auth";
 
 const route = useRoute();
@@ -21,10 +22,30 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-900">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-      <p class="text-gray-600 dark:text-gray-400">Authenticating...</p>
+  <AuthShell>
+    <div class="callback-card">
+      <div class="spinner"></div>
+      <p class="callback-text">Authenticating...</p>
     </div>
-  </div>
+  </AuthShell>
 </template>
+
+<style scoped>
+@reference "@/app/assets/index.css";
+
+.callback-card {
+  @apply text-center space-y-4;
+}
+
+.spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto;
+}
+
+.callback-text {
+  @apply text-gray-600;
+
+  @media (prefers-color-scheme: dark) {
+    @apply text-gray-400;
+  }
+}
+</style>
