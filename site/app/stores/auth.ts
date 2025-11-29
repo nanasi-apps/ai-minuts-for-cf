@@ -29,46 +29,43 @@ export const setUser = (user: User | null) => {
 };
 
 export const setLoading = (isLoading: boolean) => {
-        authStore.setState((state) => {
-                return {
-                        ...state,
-                        isLoading,
-                };
-        });
+	authStore.setState((state) => {
+		return {
+			...state,
+			isLoading,
+		};
+	});
 };
 
 export const useSession = () => {
-        return useAsyncApi(
-                (api) => api.auth.me(),
-                {
-                        key: "api:auth:me",
-                        server: true,
-                        dedupe: true,
-                },
-        );
+	return useAsyncApi((api) => api.auth.me(), {
+		key: "api:auth:me",
+		server: true,
+		dedupe: true,
+	});
 };
 
 export const checkSession = async () => {
-        setLoading(true);
-        try {
-                const { data, error, refresh, status } = useSession();
+	setLoading(true);
+	try {
+		const { data, error, refresh, status } = useSession();
 
-                if (status.value !== "success") {
-                        await refresh();
-                }
+		if (status.value !== "success") {
+			await refresh();
+		}
 
-                const user = data.value?.user ?? null;
+		const user = data.value?.user ?? null;
 
-                if (user) {
-                        setUser(user);
-                } else if (error.value || status.value === "success") {
-                        setUser(null);
-                }
-        } catch (error) {
-                console.error("Failed to check session:", error);
-                setUser(null);
-        } finally {
-                setLoading(false);
+		if (user) {
+			setUser(user);
+		} else if (error.value || status.value === "success") {
+			setUser(null);
+		}
+	} catch (error) {
+		console.error("Failed to check session:", error);
+		setUser(null);
+	} finally {
+		setLoading(false);
 	}
 };
 
