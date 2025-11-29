@@ -63,6 +63,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
+      h3:
+        specifier: ^1.13.0
+        version: 1.15.4
       jose:
         specifier: ^6.1.2
         version: 6.1.2

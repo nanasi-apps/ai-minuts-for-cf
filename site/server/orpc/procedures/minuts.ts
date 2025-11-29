@@ -86,11 +86,15 @@ export default {
 				});
 			}
 
-			// Enqueue job to Worker
-			// We need to access the QUEUE_SERVICE binding.
-			// Since it's not in the context yet, we might need to cast or access it from event.
+                        // Enqueue job to Worker
+                        const cfEnv = context.event.context.cloudflare?.env;
+                        if (!cfEnv || typeof cfEnv !== "object" || !("QUEUE_SERVICE" in cfEnv)) {
+                                throw new ORPCError("INTERNAL_SERVER_ERROR", {
+                                        message: "Queue service binding is missing.",
+                                });
+                        }
 
-			const { QUEUE_SERVICE } = context.event.context.cloudflare.env as Env;
+                        const { QUEUE_SERVICE } = cfEnv as { QUEUE_SERVICE: Fetcher };
 
 			const payload = {
 				minutsId,
@@ -159,7 +163,14 @@ export default {
 				});
 			}
 
-			const { QUEUE_SERVICE } = context.event.context.cloudflare.env as Env;
+                        const cfEnv = context.event.context.cloudflare?.env;
+                        if (!cfEnv || typeof cfEnv !== "object" || !("QUEUE_SERVICE" in cfEnv)) {
+                                throw new ORPCError("INTERNAL_SERVER_ERROR", {
+                                        message: "Queue service binding is missing.",
+                                });
+                        }
+
+                        const { QUEUE_SERVICE } = cfEnv as { QUEUE_SERVICE: Fetcher };
 
 			const payload = {
 				minutsId,

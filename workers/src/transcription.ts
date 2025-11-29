@@ -1,5 +1,15 @@
-import { Buffer } from "node:buffer";
-import type { Ai } from "@cloudflare/workers-types";
+type AiBinding = Env["AI"];
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+        let binary = "";
+        const bytes = new Uint8Array(buffer);
+
+        for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+        }
+
+        return btoa(binary);
+}
 
 const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB chunks
 const MAX_CHUNK_RETRIES = 3;
@@ -16,12 +26,12 @@ interface TranscriptionSegment {
  * Transcribe audio stored in R2 using Whisper with chunking support.
  */
 export async function transcribeAudio(
-	object: R2ObjectBody,
-	ai: Ai,
+        object: R2ObjectBody,
+        ai: AiBinding,
 ): Promise<string> {
-	if (!object.body) {
-		throw new Error("Object body is null");
-	}
+        if (!object.body) {
+                throw new Error("Object body is null");
+        }
 
 	const audioBuffer = await object.arrayBuffer();
 	const contentType = object.httpMetadata?.contentType || "audio/mpeg";
@@ -38,12 +48,12 @@ export async function transcribeAudio(
 
 	for (let i = 0; i < audioBuffer.byteLength; i += CHUNK_SIZE) {
 		const chunkIndex = Math.floor(i / CHUNK_SIZE) + 1;
-		console.log(
-			`[Transcription] Processing chunk ${chunkIndex}/${totalChunks}...`,
-		);
+                console.log(
+                        `[Transcription] Processing chunk ${chunkIndex}/${totalChunks}...`,
+                );
 
-		const chunk = audioBuffer.slice(i, i + CHUNK_SIZE);
-		const base64Audio = Buffer.from(chunk).toString("base64");
+                const chunk = audioBuffer.slice(i, i + CHUNK_SIZE);
+                const base64Audio = arrayBufferToBase64(chunk);
 
 		let chunkSuccess = false;
 		let attempt = 0;
