@@ -30,7 +30,11 @@ const {
 	status,
 	// biome-ignore lint/correctness/noUnusedVariables: used in the template
 	refresh,
-} = useAsyncApi<MinutsList>((api) => api.minuts.list());
+} = useAsyncApi<MinutsList>((api) => api.minuts.list(), {
+	key: "api:minuts:list",
+	server: false,
+	dedupe: "defer",
+});
 
 // biome-ignore lint/correctness/noUnusedVariables: used in the template
 const minutsLists = computed(() => minutsList.value ?? []);

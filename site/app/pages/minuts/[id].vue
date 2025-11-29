@@ -35,6 +35,7 @@ const {
 	status,
 	refresh,
 } = useAsyncApi(() => api.minuts.get({ id: minutsId }), {
+	key: `api:minuts:${minutsId}`,
 	server: false,
 });
 

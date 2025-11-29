@@ -2,10 +2,10 @@
 // biome-ignore lint/correctness/noUnusedImports: used in the template
 import AuthShell from "@/app/components/layout/AuthShell.vue";
 
-const route = useRoute();
-const router = useRouter();
-
 onMounted(async () => {
+	const router = useRouter();
+	const route = useRoute();
+
 	const token = route.query.token as string;
 
 	if (token) {
