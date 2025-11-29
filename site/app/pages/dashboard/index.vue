@@ -32,7 +32,7 @@ const {
 	refresh,
 } = useAsyncApi<MinutsList>((api) => api.minuts.list(), {
 	key: "api:minuts:list",
-	server: true,
+	server: false,
 	dedupe: "defer",
 });
 
