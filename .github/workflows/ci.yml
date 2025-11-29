@@ -65,25 +65,27 @@ jobs:
         run: |
           set -euo pipefail
 
-          targets=()
+          run_all=false
 
           if [ "$CI_CHANGED" = "true" ]; then
-            targets+=("workers" "site")
-          else
-            if [ "$WORKERS_CHANGED" = "true" ]; then
-              targets+=("workers")
-            fi
-
-            if [ "$SITE_CHANGED" = "true" ]; then
-              targets+=("site")
-            fi
+            run_all=true
+          elif [ "$WORKERS_CHANGED" = "true" ] && [ "$SITE_CHANGED" = "true" ]; then
+            run_all=true
           fi
 
-          if [ ${#targets[@]} -eq 0 ]; then
-            echo "No package typechecks to run."
+          if [ "$run_all" = "true" ]; then
+            pnpm typecheck
             exit 0
           fi
 
-          for target in "${targets[@]}"; do
-            pnpm "typecheck:${target}"
-          done
+          if [ "$WORKERS_CHANGED" = "true" ]; then
+            pnpm typecheck:workers
+          fi
+
+          if [ "$SITE_CHANGED" = "true" ]; then
+            pnpm typecheck:site
+          fi
+
+          if [ "$WORKERS_CHANGED" != "true" ] && [ "$SITE_CHANGED" != "true" ]; then
+            echo "No package typechecks to run."
+          fi

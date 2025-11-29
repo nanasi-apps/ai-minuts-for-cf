@@ -5,16 +5,25 @@ STAGED_FILES="$(git diff --cached --name-only)"
 # Always run biome against staged files
 pnpm biome:staged
 
-PACKAGES=""
+WORKERS_CHANGED=false
+SITE_CHANGED=false
 
 if printf "%s" "$STAGED_FILES" | grep -q '^workers/'; then
-  PACKAGES="$PACKAGES workers"
+  WORKERS_CHANGED=true
 fi
 
 if printf "%s" "$STAGED_FILES" | grep -q '^site/'; then
-  PACKAGES="$PACKAGES site"
+  SITE_CHANGED=true
 fi
 
-for pkg in $PACKAGES; do
-  pnpm "typecheck:${pkg}"
-done
+if [ "$WORKERS_CHANGED" = "true" ] && [ "$SITE_CHANGED" = "true" ]; then
+  pnpm typecheck
+else
+  if [ "$WORKERS_CHANGED" = "true" ]; then
+    pnpm typecheck:workers
+  fi
+
+  if [ "$SITE_CHANGED" = "true" ]; then
+    pnpm typecheck:site
+  fi
+fi
