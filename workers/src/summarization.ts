@@ -1,3 +1,5 @@
+import type { Ai } from "@cloudflare/workers-types";
+
 const SYSTEM_PROMPT = `
 # System Prompt (Meeting Minutes Generator)
 
@@ -102,13 +104,24 @@ List only unresolved questions mentioned in the transcript.
 * All output must be in japanese unless otherwise specified by the user.
 `;
 
-export async function summarizeTranscript(ai: any, transcript: string): Promise<string> {
-        const llmResponse = (await ai.run("@cf/meta/llama-3-8b-instruct", {
-                messages: [
-                        { role: "system", content: SYSTEM_PROMPT },
-                        { role: "user", content: transcript },
-                ],
-        })) as any;
+export async function summarizeTranscript(
+	ai: Ai,
+	transcript: string,
+): Promise<string> {
+	const llmResponse = await ai.run("@cf/meta/llama-3-8b-instruct", {
+		messages: [
+			{ role: "system", content: SYSTEM_PROMPT },
+			{ role: "user", content: transcript },
+		],
+	});
 
-        return llmResponse.response || llmResponse.result || "";
+	if (llmResponse.response) {
+		return llmResponse.response;
+	}
+
+	if ("result" in llmResponse && typeof llmResponse.result === "string") {
+		return llmResponse.result;
+	}
+
+	return "";
 }
