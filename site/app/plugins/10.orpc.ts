@@ -11,17 +11,12 @@ export default defineNuxtPlugin((_nuxtApp) => {
 		? `${requestURL.protocol}//${requestURL.host}`
 		: window.location.origin;
 
+	const tokenCookie = useCookie("session_token");
+
 	const rpcLink = new RPCLink({
 		url: new URL("/rpc", baseURL),
 		headers: () => {
-			let token: string | null = null;
-			if (import.meta.client) {
-				try {
-					token = localStorage.getItem("session_token");
-				} catch (error) {
-					console.warn("Failed to access localStorage:", error);
-				}
-			}
+			const token = tokenCookie.value;
 			return token ? { Authorization: `Bearer ${token}` } : {};
 		},
 	});

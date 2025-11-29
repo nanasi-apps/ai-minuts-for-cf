@@ -3,8 +3,9 @@ import { authStore, checkSession } from "@/app/stores/auth";
 export default defineNuxtRouteMiddleware(async (_to) => {
 	if (import.meta.server) return;
 
-	const token = localStorage.getItem("session_token");
-	if (!token) {
+	const token = useCookie("session_token");
+
+	if (!token.value) {
 		return navigateTo("/login");
 	}
 

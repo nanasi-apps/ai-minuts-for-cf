@@ -5,11 +5,16 @@ import AuthShell from "@/app/components/layout/AuthShell.vue";
 const route = useRoute();
 const router = useRouter();
 
+const tokenCookie = useCookie("session_token");
+
 onMounted(async () => {
 	const token = route.query.token as string;
 
 	if (token) {
-		// Save token to localStorage
+		// Save token to cookie for SSR support
+		tokenCookie.value = token;
+		
+		// Also save to localStorage for client-side compatibility if needed
 		localStorage.setItem("session_token", token);
 
 		// Redirect to dashboard with hard reload to ensure clean state and auth initialization

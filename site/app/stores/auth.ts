@@ -75,6 +75,9 @@ export const logout = () => {
 			localStorage.removeItem("session_token");
 		}
 
+		const token = useCookie("session_token");
+		token.value = null;
+
 		setUser(null);
 	} catch (error) {
 		console.error("Failed to logout:", error);
