@@ -1,9 +1,10 @@
 <script setup lang="ts">
 interface Props {
-        title: string;
-        description?: string;
+	title: string;
+	description?: string;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const props = defineProps<Props>();
 </script>
 

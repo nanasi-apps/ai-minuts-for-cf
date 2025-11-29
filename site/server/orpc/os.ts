@@ -1,4 +1,5 @@
 import { implement } from "@orpc/server";
+import type { H3Event } from "h3";
 import { contract } from "#/orpc";
 import { dbProviderMiddleware } from "@/server/middlewares/db";
 import type { PrismaClient } from "@/server/prisma-client/client";
@@ -16,7 +17,7 @@ export interface ORPCContext {
 	/** JWT署名・検証用の秘密鍵（環境変数 JWT_SECRET から取得） */
 	jwtSecret?: string;
 	/** H3 Event object for accessing cookies etc. */
-	event: any;
+	event: H3Event;
 }
 
 /**

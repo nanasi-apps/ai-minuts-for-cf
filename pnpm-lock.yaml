@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@biomejs/biome':
+        specifier: 2.3.8
+        version: 2.3.8
       '@types/node':
         specifier: ^24.10.1
         version: 24.10.1
@@ -15,12 +18,12 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
     devDependencies:
-      '@biomejs/biome':
-        specifier: ^2.3.8
-        version: 2.3.8
       '@cloudflare/workers-types':
         specifier: ^4.20251128.0
         version: 4.20251128.0
+      husky:
+        specifier: ^9.1.7
+        version: 9.1.7
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -63,6 +66,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
+      h3:
+        specifier: ^1.13.0
+        version: 1.15.4
       jose:
         specifier: ^6.1.2
         version: 6.1.2
@@ -94,9 +100,6 @@ importers:
       '@vue/language-server':
         specifier: ^3.1.5
         version: 3.1.5(typescript@5.9.3)
-      husky:
-        specifier: ^9.1.7
-        version: 9.1.7
       prisma:
         specifier: ^7.0.1
         version: 7.0.1(@types/react@19.2.7)(magicast@0.5.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
@@ -104,8 +107,8 @@ importers:
   workers:
     dependencies:
       hono:
-        specifier: ^4.0.0
-        version: 4.7.10
+        specifier: 4.10.3
+        version: 4.10.3
 
 packages:
 
@@ -3533,6 +3536,10 @@ packages:
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
+
+  hono@4.10.3:
+    resolution: {integrity: sha512-2LOYWUbnhdxdL8MNbNg9XZig6k+cZXm5IjHn2Aviv7honhBMOHb+jxrKIeJRZJRmn+htUCKhaicxwXuUDlchRA==}
+    engines: {node: '>=16.9.0'}
 
   hono@4.7.10:
     resolution: {integrity: sha512-QkACju9MiN59CKSY5JsGZCYmPZkA6sIW6OFCUp7qDjZu6S6KHtJHhAc9Uy9mV9F8PJ1/HQ3ybZF2yjCa/73fvQ==}
@@ -9540,6 +9547,8 @@ snapshots:
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
+
+  hono@4.10.3: {}
 
   hono@4.7.10: {}
 

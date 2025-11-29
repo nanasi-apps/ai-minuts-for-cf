@@ -1,15 +1,17 @@
 <script setup lang="ts">
 interface Props {
-        size?: "wide" | "narrow";
+	size?: "wide" | "narrow";
 }
 
 const props = withDefaults(defineProps<Props>(), {
-        size: "wide",
+	size: "wide",
 });
 
 const sizeClass = computed(() =>
-        props.size === "narrow" ? "page-container-narrow" : "page-container-wide",
+	props.size === "narrow" ? "page-container-narrow" : "page-container-wide",
 );
+
+defineExpose({ sizeClass });
 </script>
 
 <template>

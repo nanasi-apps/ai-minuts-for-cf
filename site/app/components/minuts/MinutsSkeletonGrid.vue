@@ -1,11 +1,12 @@
 <script setup lang="ts">
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const props = withDefaults(
-  defineProps<{
-    items?: number;
-  }>(),
-  {
-    items: 3,
-  },
+	defineProps<{
+		items?: number;
+	}>(),
+	{
+		items: 3,
+	},
 );
 </script>
 

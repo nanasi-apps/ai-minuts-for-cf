@@ -5,8 +5,10 @@ const props = defineProps<{
 	toast: Toast;
 }>();
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const emit = defineEmits<(e: "close", id: number) => void>();
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const typeClasses = computed(() => {
 	switch (props.toast.type) {
 		case "success":
