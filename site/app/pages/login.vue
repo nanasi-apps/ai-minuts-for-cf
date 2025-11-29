@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useStore } from "@tanstack/vue-store";
+import AuthShell from "@/app/components/layout/AuthShell.vue";
 import Button from "@/app/components/general/Button.vue";
 import { authStore } from "@/app/stores/auth";
 
@@ -19,29 +20,71 @@ const handleGoogleLogin = () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-900 p-4">
-    <div class="w-full max-w-md">
-      <div class="bg-white dark:bg-stone-800 rounded-3xl shadow-xl p-8 md:p-10 border border-stone-100 dark:border-stone-700">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-stone-900 dark:text-white mb-2">{{ $t('login.title') }}</h1>
-          <p class="text-stone-500 dark:text-stone-400">{{ $t('login.subtitle') }}</p>
-        </div>
-        <div class="mt-8">
-            <Button 
-              variant="white" 
-              size="large" 
-              class="w-full justify-center flex items-center gap-3 border border-stone-200 dark:border-stone-700"
-              @click="handleGoogleLogin"
-            >
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5" />
-              {{ $t('login.google') }}
-            </Button>
-        </div>
+  <AuthShell>
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h1 class="auth-title">{{ $t('login.title') }}</h1>
+        <p class="auth-subtitle">{{ $t('login.subtitle') }}</p>
+      </div>
+      <div class="auth-body">
+          <Button
+            variant="white"
+            size="large"
+            class="google-button"
+            @click="handleGoogleLogin"
+          >
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="google-icon" />
+            {{ $t('login.google') }}
+          </Button>
       </div>
     </div>
-  </div>
+  </AuthShell>
 </template>
 
 <style scoped>
 @reference "@/app/assets/index.css";
+
+.auth-card {
+  @apply bg-white rounded-3xl shadow-xl p-8 md:p-10 border border-stone-100 text-center;
+
+  @media (prefers-color-scheme: dark) {
+    @apply bg-stone-800 border-stone-700;
+  }
+}
+
+.auth-card-header {
+  @apply mb-8 space-y-2;
+}
+
+.auth-title {
+  @apply text-3xl font-bold text-stone-900;
+
+  @media (prefers-color-scheme: dark) {
+    @apply text-white;
+  }
+}
+
+.auth-subtitle {
+  @apply text-stone-500;
+
+  @media (prefers-color-scheme: dark) {
+    @apply text-stone-400;
+  }
+}
+
+.auth-body {
+  @apply mt-8;
+}
+
+.google-button {
+  @apply w-full justify-center flex items-center gap-3 border border-stone-200;
+
+  @media (prefers-color-scheme: dark) {
+    @apply border-stone-700;
+  }
+}
+
+.google-icon {
+  @apply w-5 h-5;
+}
 </style>
