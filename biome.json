@@ -11,7 +11,7 @@
 			"**",
 			"!**/*.d.ts",
 			"!site/app/assets/index.css",
-			"site/server/prisma-client"
+			"!site/server/prisma-client"
 		]
 	},
 	"formatter": {
