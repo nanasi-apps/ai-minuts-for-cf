@@ -3,7 +3,6 @@
 	"extends": "./.nuxt/tsconfig.json",
 	"compilerOptions": {
 		"baseUrl": ".",
-		"types": ["./types/prisma-client"],
 		"paths": {
 			"@/*": ["./*"],
 			"#/*": ["./shared/*"]
