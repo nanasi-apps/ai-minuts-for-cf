@@ -55,10 +55,23 @@ jobs:
       - name: Biome check (workspace)
         run: pnpm biome:check
 
-      - name: Workers typecheck
-        if: steps.changes.outputs.workers == 'true'
-        run: pnpm typecheck:workers
+      - name: Package typechecks
+        env:
+          WORKERS_CHANGED: ${{ steps.changes.outputs.workers }}
+          SITE_CHANGED: ${{ steps.changes.outputs.site }}
+        run: |
+          set -euo pipefail
 
-      - name: Nuxt typecheck
-        if: steps.changes.outputs.site == 'true'
-        run: pnpm typecheck:site
+          targets=()
+
+          if [ "$WORKERS_CHANGED" = "true" ]; then
+            targets+=("workers")
+          fi
+
+          if [ "$SITE_CHANGED" = "true" ]; then
+            targets+=("site")
+          fi
+
+          for target in "${targets[@]}"; do
+            pnpm "typecheck:${target}"
+          done

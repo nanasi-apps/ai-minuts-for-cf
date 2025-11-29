@@ -5,12 +5,16 @@ STAGED_FILES="$(git diff --cached --name-only)"
 # Always run biome against staged files
 pnpm biome:staged
 
-# Conditionally typecheck workers when relevant files are staged
+PACKAGES=""
+
 if printf "%s" "$STAGED_FILES" | grep -q '^workers/'; then
-  pnpm typecheck:workers
+  PACKAGES="$PACKAGES workers"
 fi
 
-# Conditionally typecheck Nuxt app when relevant files are staged
 if printf "%s" "$STAGED_FILES" | grep -q '^site/'; then
-  pnpm typecheck:site
+  PACKAGES="$PACKAGES site"
 fi
+
+for pkg in $PACKAGES; do
+  pnpm "typecheck:${pkg}"
+done
