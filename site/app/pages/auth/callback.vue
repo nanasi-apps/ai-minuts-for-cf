@@ -1,10 +1,9 @@
 <script setup lang="ts">
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import AuthShell from "@/app/components/layout/AuthShell.vue";
-import { setUser } from "@/app/stores/auth";
 
 const route = useRoute();
 const router = useRouter();
-const { $api } = useNuxtApp();
 
 onMounted(async () => {
 	const token = route.query.token as string;

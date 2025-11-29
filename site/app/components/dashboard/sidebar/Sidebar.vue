@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import SidebarItem from "@/app/components/dashboard/sidebar/SidebarItem.vue";
 import { logout } from "@/app/stores/auth";
 
@@ -12,10 +13,12 @@ defineProps<{
 	}>;
 }>();
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const goToRoute = (route: string) => {
 	router.push(route);
 };
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const handleLogout = () => {
 	logout();
 	window.location.href = "/login";

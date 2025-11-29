@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import type { InferContractRouterOutputs } from "@orpc/contract";
 import type { contract } from "#/orpc";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Button from "@/app/components/general/Button.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import StatePanel from "@/app/components/general/StatePanel.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import PageContainer from "@/app/components/layout/PageContainer.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import SectionHeader from "@/app/components/layout/SectionHeader.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import MinutsCard from "@/app/components/minuts/MinutsCard.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import MinutsSkeletonGrid from "@/app/components/minuts/MinutsSkeletonGrid.vue";
 import { useAsyncApi } from "@/app/composable/useApi";
 
@@ -20,10 +26,13 @@ definePageMeta({
 
 const {
 	data: minutsList,
+	// biome-ignore lint/correctness/noUnusedVariables: used in the template
 	status,
+	// biome-ignore lint/correctness/noUnusedVariables: used in the template
 	refresh,
 } = useAsyncApi<MinutsList>((api) => api.minuts.list());
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const minutsLists = computed(() => minutsList.value ?? []);
 </script>
 

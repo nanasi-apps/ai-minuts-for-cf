@@ -65,7 +65,7 @@ export const authMiddleware = os.middleware(async ({ context, next }) => {
 				userId: Number(payload.userId),
 			},
 		});
-	} catch (e) {
+	} catch (_error) {
 		throw new ORPCError("UNAUTHORIZED", {
 			message: "無効または期限切れのトークンです",
 		});

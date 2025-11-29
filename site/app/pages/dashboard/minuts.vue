@@ -1,6 +1,9 @@
 <script setup lang="ts">
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import FileInput from "@/app/components/dashboard/FileInput.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import PageContainer from "@/app/components/layout/PageContainer.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import SectionHeader from "@/app/components/layout/SectionHeader.vue";
 import { useApi } from "@/app/composable/useApi";
 import { useToast } from "@/app/composables/useToast";
@@ -18,6 +21,7 @@ const isUploading = ref(false);
 const uploadProgress = ref(0);
 const errorMessage = ref<string | null>(null);
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const handleFileSelect = async (file: File) => {
 	if (isUploading.value) return;
 
@@ -51,9 +55,10 @@ const handleFileSelect = async (file: File) => {
 
 		// 5. Redirect
 		router.push(`/minuts/${minutsId}`);
-	} catch (e: any) {
-		console.error(e);
-		errorMessage.value = e.message || "アップロードに失敗しました";
+	} catch (error) {
+		console.error(error);
+		errorMessage.value =
+			error instanceof Error ? error.message : "アップロードに失敗しました";
 		addToast("アップロードに失敗しました", "error");
 	} finally {
 		isUploading.value = false;

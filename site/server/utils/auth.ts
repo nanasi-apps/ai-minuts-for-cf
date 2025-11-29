@@ -2,6 +2,14 @@ const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 
+const getRequiredEnv = (key: string) => {
+	const value = process.env[key];
+	if (!value) {
+		throw new Error(`Missing environment variable: ${key}`);
+	}
+	return value;
+};
+
 export interface GoogleUser {
 	id: string;
 	email: string;
@@ -15,8 +23,8 @@ export interface GoogleUser {
 
 export const getGoogleAuthUrl = () => {
 	const params = new URLSearchParams({
-		client_id: process.env.GOOGLE_CLIENT_ID!,
-		redirect_uri: process.env.GOOGLE_REDIRECT_URI!,
+		client_id: getRequiredEnv("GOOGLE_CLIENT_ID"),
+		redirect_uri: getRequiredEnv("GOOGLE_REDIRECT_URI"),
 		response_type: "code",
 		scope: "openid email profile",
 		access_type: "offline",
@@ -33,9 +41,9 @@ export const getGoogleUser = async (code: string): Promise<GoogleUser> => {
 		},
 		body: new URLSearchParams({
 			code,
-			client_id: process.env.GOOGLE_CLIENT_ID!,
-			client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-			redirect_uri: process.env.GOOGLE_REDIRECT_URI!,
+			client_id: getRequiredEnv("GOOGLE_CLIENT_ID"),
+			client_secret: getRequiredEnv("GOOGLE_CLIENT_SECRET"),
+			redirect_uri: getRequiredEnv("GOOGLE_REDIRECT_URI"),
 			grant_type: "authorization_code",
 		}),
 	});
