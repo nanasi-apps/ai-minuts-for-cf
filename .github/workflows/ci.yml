@@ -11,28 +11,36 @@ on:
       - dev
 
 jobs:
-  test:
+  checks:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Setup Node.js v24
+
+      - name: Detect changed paths
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            site:
+              - 'site/**'
+            workers:
+              - 'workers/**'
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          
+          node-version: 22
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: latest
-          
+
       - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-          
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
@@ -40,19 +48,17 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-            
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
-      - name: Generate Prisma client
-        run: pnpm prisma:generate
-        
-      - name: Run lint and format check
-        run: pnpm lint-format
-        
-      - name: Run typecheck
-        run: pnpm typecheck
-        
-      - name: Build project
-        run: pnpm build
-  
+
+      - name: Biome check (workspace)
+        run: pnpm biome:check
+
+      - name: Workers typecheck
+        if: steps.changes.outputs.workers == 'true'
+        run: pnpm typecheck:workers
+
+      - name: Nuxt typecheck
+        if: steps.changes.outputs.site == 'true'
+        run: pnpm typecheck:site
