@@ -13,6 +13,7 @@ import SectionHeader from "@/app/components/layout/SectionHeader.vue";
 import MinutsCard from "@/app/components/minuts/MinutsCard.vue";
 // biome-ignore lint/correctness/noUnusedImports: used in the template
 import MinutsSkeletonGrid from "@/app/components/minuts/MinutsSkeletonGrid.vue";
+import ConfirmDialog from "@/app/components/ui/ConfirmDialog.vue";
 import { useApi, useAsyncApi } from "@/app/composable/useApi";
 
 export type Outputs = InferContractRouterOutputs<typeof contract>;
@@ -40,6 +41,27 @@ const {
 
 // biome-ignore lint/correctness/noUnusedVariables: used in the template
 const minutsLists = computed(() => minutsList.value ?? []);
+
+const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
+const deletingId = ref<number | null>(null);
+
+const onDeleteClick = (id: number) => {
+  deletingId.value = id;
+  confirmDialog.value?.open();
+};
+
+const onConfirmDelete = async () => {
+  if (deletingId.value === null) return;
+  
+  try {
+    await api.minuts.delete({ id: deletingId.value });
+    refresh();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    deletingId.value = null;
+  }
+};
 </script>
 
 <template>
@@ -63,6 +85,7 @@ const minutsLists = computed(() => minutsList.value ?? []);
         v-for="minuts in minutsLists"
         :key="minuts.id"
         :minuts="minuts"
+        @delete="onDeleteClick"
       />
     </div>
 
@@ -92,6 +115,15 @@ const minutsLists = computed(() => minutsList.value ?? []);
         </NuxtLink>
       </template>
     </StatePanel>
+
+    <ConfirmDialog
+      ref="confirmDialog"
+      title="議事録の削除"
+      message="この議事録を削除してもよろしいですか？この操作は取り消せません。"
+      confirm-text="削除する"
+      type="danger"
+      @confirm="onConfirmDelete"
+    />
   </PageContainer>
 </template>
 

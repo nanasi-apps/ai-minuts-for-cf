@@ -5,6 +5,7 @@ import MinutsDetailSkeleton from "@/app/components/minuts/MinutsDetailSkeleton.v
 import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
 import SummaryCard from "@/app/components/minuts/SummaryCard.vue";
 import TranscriptCard from "@/app/components/minuts/TranscriptCard.vue";
+import ConfirmDialog from "@/app/components/ui/ConfirmDialog.vue";
 import { useApi, useAsyncApi } from "@/app/composable/useApi";
 import { useDateFormat } from "@/app/composables/useDateFormat";
 import { useToast } from "@/app/composables/useToast";
@@ -59,9 +60,13 @@ const regenerateSummary = async () => {
 	}
 };
 
-const handleDelete = async () => {
-  if (!confirm("本当に削除しますか？この操作は取り消せません。")) return;
-  
+const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
+
+const handleDelete = () => {
+  confirmDialog.value?.open();
+};
+
+const onConfirmDelete = async () => {
   try {
     await api.minuts.delete({ id: minutsId });
     addToast("削除しました", "success");
@@ -117,6 +122,15 @@ const handleDelete = async () => {
             :transcript="minuts.transcript"
         />
     </div>
+
+    <ConfirmDialog
+      ref="confirmDialog"
+      title="議事録の削除"
+      message="この議事録を削除してもよろしいですか？この操作は取り消せません。"
+      confirm-text="削除する"
+      type="danger"
+      @confirm="onConfirmDelete"
+    />
   </PageContainer>
 </template>
 

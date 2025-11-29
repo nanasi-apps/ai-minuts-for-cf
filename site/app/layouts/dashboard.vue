@@ -1,13 +1,10 @@
 <script setup lang="ts">
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Sidebar from "@/app/components/dashboard/sidebar/Sidebar.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import UiToastContainer from "@/app/components/ui/ToastContainer.vue";
 
 const route = useRoute();
 const { t } = useI18n();
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const sidebarItems = computed(() => [
 	{
 		name: t("sidebar.overview"),
@@ -22,7 +19,6 @@ const sidebarItems = computed(() => [
 	},
 ]);
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const title = computed(() => t((route.meta?.title as string) ?? "dashboard"));
 </script>
 
@@ -30,11 +26,6 @@ const title = computed(() => t((route.meta?.title as string) ?? "dashboard"));
   <div class="root">
     <Sidebar :items="sidebarItems" />
     <main>
-      <h1 class="title">
-        <ClientOnly>
-          {{ title }}
-        </ClientOnly>
-      </h1>
       <slot />
     </main>
     <UiToastContainer />
