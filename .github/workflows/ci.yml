@@ -27,6 +27,8 @@ jobs:
               - 'site/**'
             workers:
               - 'workers/**'
+            ci:
+              - '.github/**'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -59,17 +61,27 @@ jobs:
         env:
           WORKERS_CHANGED: ${{ steps.changes.outputs.workers }}
           SITE_CHANGED: ${{ steps.changes.outputs.site }}
+          CI_CHANGED: ${{ steps.changes.outputs.ci }}
         run: |
           set -euo pipefail
 
           targets=()
 
-          if [ "$WORKERS_CHANGED" = "true" ]; then
-            targets+=("workers")
+          if [ "$CI_CHANGED" = "true" ]; then
+            targets+=("workers" "site")
+          else
+            if [ "$WORKERS_CHANGED" = "true" ]; then
+              targets+=("workers")
+            fi
+
+            if [ "$SITE_CHANGED" = "true" ]; then
+              targets+=("site")
+            fi
           fi
 
-          if [ "$SITE_CHANGED" = "true" ]; then
-            targets+=("site")
+          if [ ${#targets[@]} -eq 0 ]; then
+            echo "No package typechecks to run."
+            exit 0
           fi
 
           for target in "${targets[@]}"; do
