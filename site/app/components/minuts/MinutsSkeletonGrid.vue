@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const props = withDefaults(
-  defineProps<{
-    items?: number;
-  }>(),
-  {
-    items: 3,
-  },
+	defineProps<{
+		items?: number;
+	}>(),
+	{
+		items: 3,
+	},
 );
 </script>
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Button from "@/app/components/general/Button.vue";
 import PageContainer from "@/app/components/layout/PageContainer.vue";
-import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
 import MinutsDetailSkeleton from "@/app/components/minuts/MinutsDetailSkeleton.vue";
+import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
 import SummaryCard from "@/app/components/minuts/SummaryCard.vue";
 import TranscriptCard from "@/app/components/minuts/TranscriptCard.vue";
 import { useApi, useAsyncApi } from "@/app/composable/useApi";

@@ -3,14 +3,14 @@ import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
 import { useDateFormat } from "@/app/composables/useDateFormat";
 
 interface MinutsItem {
-  id: number;
-  title: string;
-  status: string;
-  createdAt: string | Date;
+	id: number;
+	title: string;
+	status: string;
+	createdAt: string | Date;
 }
 
 interface Props {
-  minuts: MinutsItem;
+	minuts: MinutsItem;
 }
 
 defineProps<Props>();

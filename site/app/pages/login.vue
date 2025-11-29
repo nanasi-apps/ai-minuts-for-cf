@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useStore } from "@tanstack/vue-store";
-import AuthShell from "@/app/components/layout/AuthShell.vue";
 import Button from "@/app/components/general/Button.vue";
+import AuthShell from "@/app/components/layout/AuthShell.vue";
 import { authStore } from "@/app/stores/auth";
 
 const user = useStore(authStore, (state) => state.user);

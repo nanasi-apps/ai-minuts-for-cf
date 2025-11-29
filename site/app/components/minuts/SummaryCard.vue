@@ -2,15 +2,13 @@
 import Button from "@/app/components/general/Button.vue";
 
 interface Props {
-  summary: string;
-  isProcessing?: boolean;
+	summary: string;
+	isProcessing?: boolean;
 }
 
 defineProps<Props>();
 
-const emit = defineEmits<{
-  (e: 'regenerate'): void
-}>();
+const emit = defineEmits<(e: "regenerate") => void>();
 </script>
 
 <template>

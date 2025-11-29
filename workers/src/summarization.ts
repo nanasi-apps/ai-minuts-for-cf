@@ -102,13 +102,16 @@ List only unresolved questions mentioned in the transcript.
 * All output must be in japanese unless otherwise specified by the user.
 `;
 
-export async function summarizeTranscript(ai: any, transcript: string): Promise<string> {
-        const llmResponse = (await ai.run("@cf/meta/llama-3-8b-instruct", {
-                messages: [
-                        { role: "system", content: SYSTEM_PROMPT },
-                        { role: "user", content: transcript },
-                ],
-        })) as any;
+export async function summarizeTranscript(
+	ai: any,
+	transcript: string,
+): Promise<string> {
+	const llmResponse = (await ai.run("@cf/meta/llama-3-8b-instruct", {
+		messages: [
+			{ role: "system", content: SYSTEM_PROMPT },
+			{ role: "user", content: transcript },
+		],
+	})) as any;
 
-        return llmResponse.response || llmResponse.result || "";
+	return llmResponse.response || llmResponse.result || "";
 }

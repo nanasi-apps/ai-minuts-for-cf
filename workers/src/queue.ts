@@ -134,41 +134,41 @@ export class QueueDO implements DurableObject {
 		}
 	}
 
-        async processJob(job: Job) {
-                console.log(
-                        `Processing job ${job.id} for minutsId: ${job.payload.minutsId}`,
-                );
+	async processJob(job: Job) {
+		console.log(
+			`Processing job ${job.id} for minutsId: ${job.payload.minutsId}`,
+		);
 
-                try {
-                        await processMinutsJob(this.env, job);
-                        await this.complete(job.id);
-                } catch (e) {
-                        console.error(`Job failed: ${e}`);
+		try {
+			await processMinutsJob(this.env, job);
+			await this.complete(job.id);
+		} catch (e) {
+			console.error(`Job failed: ${e}`);
 
-                        // Retry logic
-                        if ((job.retryCount || 0) < 3) {
-                                console.log(
-                                        `Retrying job ${job.id} (attempt ${(job.retryCount || 0) + 1})`,
-                                );
-                                await this.retry(job.id, String(e));
+			// Retry logic
+			if ((job.retryCount || 0) < 3) {
+				console.log(
+					`Retrying job ${job.id} (attempt ${(job.retryCount || 0) + 1})`,
+				);
+				await this.retry(job.id, String(e));
 
-                                // Reschedule alarm for retry
-                                await this.state.storage.setAlarm(Date.now() + 1000);
-                        } else {
-                                console.error(`Job ${job.id} failed after 3 attempts`);
-                                // Update status in D1 to FAILED
-                                try {
-                                        await this.env.ai_minuts
-                                                .prepare("UPDATE Minuts SET status = ? WHERE id = ?")
-                                                .bind("FAILED", job.payload.minutsId)
-                                                .run();
-                                } catch (dbError) {
-                                        console.error("Failed to update D1 status:", dbError);
-                                }
+				// Reschedule alarm for retry
+				await this.state.storage.setAlarm(Date.now() + 1000);
+			} else {
+				console.error(`Job ${job.id} failed after 3 attempts`);
+				// Update status in D1 to FAILED
+				try {
+					await this.env.ai_minuts
+						.prepare("UPDATE Minuts SET status = ? WHERE id = ?")
+						.bind("FAILED", job.payload.minutsId)
+						.run();
+				} catch (dbError) {
+					console.error("Failed to update D1 status:", dbError);
+				}
 
-                                // Fail job
-                                await this.fail(job.id, String(e));
-                        }
-                }
-        }
+				// Fail job
+				await this.fail(job.id, String(e));
+			}
+		}
+	}
 }
