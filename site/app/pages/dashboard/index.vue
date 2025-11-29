@@ -13,7 +13,7 @@ import SectionHeader from "@/app/components/layout/SectionHeader.vue";
 import MinutsCard from "@/app/components/minuts/MinutsCard.vue";
 // biome-ignore lint/correctness/noUnusedImports: used in the template
 import MinutsSkeletonGrid from "@/app/components/minuts/MinutsSkeletonGrid.vue";
-import { useAsyncApi } from "@/app/composable/useApi";
+import { useApi, useAsyncApi } from "@/app/composable/useApi";
 
 export type Outputs = InferContractRouterOutputs<typeof contract>;
 
@@ -23,6 +23,8 @@ definePageMeta({
 	layout: "dashboard",
 	middleware: ["auth"],
 });
+
+const api = useApi();
 
 const {
 	data: minutsList,

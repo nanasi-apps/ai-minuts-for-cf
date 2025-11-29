@@ -16,6 +16,8 @@ interface Props {
 
 defineProps<Props>();
 
+
+
 // biome-ignore lint/correctness/noUnusedVariables: used in the template
 const { formatDate } = useDateFormat();
 </script>

@@ -196,4 +196,29 @@ export default {
 				message: "再要約を開始しました。",
 			};
 		}),
+
+	delete: os.minuts.delete.use(authMiddleware).handler(async ({ context, input }) => {
+		const minuts = await context.db.minuts.findUnique({
+			where: {
+				id: input.id,
+				userId: context.userId,
+			},
+		});
+
+		if (!minuts) {
+			throw new ORPCError("NOT_FOUND", {
+				message: "議事録が見つかりません",
+			});
+		}
+
+		await context.db.minuts.delete({
+			where: {
+				id: input.id,
+			},
+		});
+
+		return {
+			success: true,
+		};
+	}),
 };

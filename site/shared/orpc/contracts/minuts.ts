@@ -83,10 +83,27 @@ const regenerateSummary = oc
 		}),
 	);
 
+const remove = oc
+	.route({
+		path: "/:id",
+		method: "DELETE",
+	})
+	.input(
+		z.object({
+			id: z.number(),
+		}),
+	)
+	.output(
+		z.object({
+			success: z.boolean(),
+		}),
+	);
+
 export const minuts = oc.prefix("/minuts").router({
 	generatePresignedUrl,
 	list,
 	process,
 	get,
 	regenerateSummary,
+	delete: remove,
 });

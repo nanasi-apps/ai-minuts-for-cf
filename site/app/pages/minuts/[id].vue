@@ -1,15 +1,9 @@
 <script setup lang="ts">
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Button from "@/app/components/general/Button.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import PageContainer from "@/app/components/layout/PageContainer.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import MinutsDetailSkeleton from "@/app/components/minuts/MinutsDetailSkeleton.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import SummaryCard from "@/app/components/minuts/SummaryCard.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import TranscriptCard from "@/app/components/minuts/TranscriptCard.vue";
 import { useApi, useAsyncApi } from "@/app/composable/useApi";
 import { useDateFormat } from "@/app/composables/useDateFormat";
@@ -64,6 +58,19 @@ const regenerateSummary = async () => {
 		addToast("再要約の開始に失敗しました", "error");
 	}
 };
+
+const handleDelete = async () => {
+  if (!confirm("本当に削除しますか？この操作は取り消せません。")) return;
+  
+  try {
+    await api.minuts.delete({ id: minutsId });
+    addToast("削除しました", "success");
+    navigateTo("/dashboard");
+  } catch (e) {
+    console.error(e);
+    addToast("削除に失敗しました", "error");
+  }
+};
 </script>
 
 <template>
@@ -80,13 +87,22 @@ const regenerateSummary = async () => {
                 </div>
             </div>
 
-            <Button
-                v-if="minuts.status === 'UPLOADING' || minuts.status === 'FAILED'"
-                @click="processMinuts"
-                variant="primary"
-            >
-                議事録を作成する
-            </Button>
+            <div class="flex gap-2">
+                <Button
+                    v-if="minuts.status === 'UPLOADING' || minuts.status === 'FAILED'"
+                    @click="processMinuts"
+                    variant="primary"
+                >
+                    議事録を作成する
+                </Button>
+                <Button
+                    @click="handleDelete"
+                    variant="secondary"
+                    class="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                >
+                    削除
+                </Button>
+            </div>
         </div>
 
         <SummaryCard
