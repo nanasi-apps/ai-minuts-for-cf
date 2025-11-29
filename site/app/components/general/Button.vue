@@ -6,6 +6,7 @@ interface Props {
 	shadow?: boolean;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const props = withDefaults(defineProps<Props>(), {
 	variant: "primary",
 	size: "medium",

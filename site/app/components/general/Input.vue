@@ -9,6 +9,7 @@ interface Props {
 	disabled?: boolean;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const props = withDefaults(defineProps<Props>(), {
 	type: "text",
 	disabled: false,
@@ -16,6 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<(e: "update:modelValue", value: string) => void>();
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const updateValue = (event: Event) => {
 	const target = event.target as HTMLInputElement;
 	emit("update:modelValue", target.value);

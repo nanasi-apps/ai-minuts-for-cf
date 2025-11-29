@@ -3,22 +3,26 @@
 	"private": true,
 	"scripts": {
 		"dev": "pnpm -r --parallel dev",
-		"dev:site": "pnpm --filter site dev",
-		"dev:workers": "pnpm --filter workers dev",
-		"deploy:site": "pnpm --filter site deploy",
-		"deploy:workers": "pnpm --filter workers deploy",
+		"dev:site": "pnpm --filter ./site dev",
+		"dev:workers": "pnpm --filter ./workers dev",
+		"prisma:generate": "pnpm --filter ./site prisma:generate",
+		"deploy:site": "pnpm --filter ./site deploy",
+		"deploy:workers": "pnpm --filter ./workers deploy",
 		"typecheck": "pnpm -r typecheck",
-		"check": "biome check .",
-		"format": "biome check --write ."
+		"lint-format": "biome check",
+		"lint-format:fix": "biome check --write",
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"@types/node": "^24.10.1",
-		"zod": "^4.1.13"
+		"zod": "^4.1.13",
+		"@biomejs/biome": "2.3.8"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.8",
 		"@cloudflare/workers-types": "^4.20251128.0",
 		"typescript": "^5.9.3",
-		"wrangler": "^4.51.0"
+		"wrangler": "^4.51.0",
+		"husky": "^9.1.7"
 	}
 }

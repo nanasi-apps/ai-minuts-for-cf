@@ -24,10 +24,11 @@ import { useApi } from "@/app/composable/useApi";
 
 const file = ref<File | null>(null);
 const uploading = ref(false);
-const result = ref<any>(null);
+const result = ref<unknown>(null);
 const steps = ref<string[]>([]);
 const api = useApi();
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const handleFileChange = (e: Event) => {
 	const target = e.target as HTMLInputElement;
 	if (target.files && target.files.length > 0) {
@@ -38,6 +39,7 @@ const handleFileChange = (e: Event) => {
 	}
 };
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const upload = async () => {
 	if (!file.value) return;
 
@@ -76,9 +78,9 @@ const upload = async () => {
 
 		steps.value.push("Job enqueued successfully!");
 		result.value = processData;
-	} catch (e) {
-		steps.value.push(`Error: ${e}`);
-		result.value = e;
+	} catch (error) {
+		steps.value.push(`Error: ${String(error)}`);
+		result.value = error;
 	} finally {
 		uploading.value = false;
 	}

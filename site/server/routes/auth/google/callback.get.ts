@@ -25,8 +25,14 @@ export default defineEventHandler(async (event) => {
 				statusMessage: "Database configuration error",
 			});
 		}
-		// biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: Checked above
-		const prisma = createPrismaClient(env.ai_minuts as D1Database);
+		const database = env.ai_minuts as D1Database | undefined;
+		if (!database) {
+			throw createError({
+				statusCode: 500,
+				statusMessage: "Database binding missing",
+			});
+		}
+		const prisma = createPrismaClient(database);
 		// Find or create user
 		let user = await prisma.user.findUnique({
 			where: { email: googleUser.email },

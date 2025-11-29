@@ -1,9 +1,15 @@
 <script setup lang="ts">
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Button from "@/app/components/general/Button.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import PageContainer from "@/app/components/layout/PageContainer.vue";
-import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import MinutsDetailSkeleton from "@/app/components/minuts/MinutsDetailSkeleton.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
+import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import SummaryCard from "@/app/components/minuts/SummaryCard.vue";
+// biome-ignore lint/correctness/noUnusedImports: used in the template
 import TranscriptCard from "@/app/components/minuts/TranscriptCard.vue";
 import { useApi, useAsyncApi } from "@/app/composable/useApi";
 import { useDateFormat } from "@/app/composables/useDateFormat";
@@ -18,11 +24,14 @@ const route = useRoute();
 const minutsId = Number(route.params.id);
 
 const api = useApi();
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const { formatDate } = useDateFormat();
 const { addToast } = useToast();
 
 const {
+	// biome-ignore lint/correctness/noUnusedVariables: used in the template
 	data: minuts,
+	// biome-ignore lint/correctness/noUnusedVariables: used in the template
 	status,
 	refresh,
 } = useAsyncApi(() => api.minuts.get({ id: minutsId }), {
@@ -30,6 +39,7 @@ const {
         server: true,
 });
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const processMinuts = async () => {
 	try {
 		await api.minuts.process({ minutsId });
@@ -40,6 +50,7 @@ const processMinuts = async () => {
 	}
 };
 
+// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const regenerateSummary = async () => {
 	console.log("regenerateSummary clicked");
 	try {
