@@ -19,10 +19,14 @@ definePageMeta({
 });
 
 const {
-	data: minutsList,
-	status,
-	refresh,
-} = useAsyncApi<MinutsList>((api) => api.minuts.list());
+        data: minutsList,
+        status,
+        refresh,
+} = useAsyncApi<MinutsList>((api) => api.minuts.list(), {
+        key: "api:minuts:list",
+        server: true,
+        dedupe: true,
+});
 
 const minutsLists = computed(() => minutsList.value ?? []);
 </script>
