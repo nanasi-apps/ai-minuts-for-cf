@@ -44,7 +44,7 @@ const onConfirmDelete = async () => {
 	if (deletingId.value === null) return;
 
 	try {
-		await api.minuts.delete({ id: deletingId.value });
+		await api.minuts.delete({ minutsId: deletingId.value });
 		refresh();
 	} catch (e) {
 		console.error(e);

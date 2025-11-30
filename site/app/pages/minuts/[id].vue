@@ -43,14 +43,10 @@ const processMinuts = async () => {
 };
 
 const regenerateSummary = async () => {
-	console.log("regenerateSummary clicked");
 	try {
-		console.log("Calling api.minuts.regenerateSummary...");
 		await api.minuts.regenerateSummary({ minutsId });
-		console.log("API call success");
 		addToast("再要約を開始しました", "success");
 	} catch (e) {
-		console.error("API call failed", e);
 		addToast("再要約の開始に失敗しました", "error");
 	}
 };
@@ -63,7 +59,7 @@ const handleDelete = () => {
 
 const onConfirmDelete = async () => {
 	try {
-		await api.minuts.delete({ id: minutsId });
+		await api.minuts.delete({ minutsId });
 		addToast("削除しました", "success");
 		navigateTo("/dashboard");
 	} catch (e) {
