@@ -1,8 +1,35 @@
 type AiBinding = Env["AI"];
+export type MinutesLanguage = "ja" | "en";
 
-const SYSTEM_PROMPT = `
+type SummarizationOptions = {
+	minutesLanguage?: MinutesLanguage;
+	summaryPreference?: string;
+};
+
+const SUMMARY_PREFERENCE_MAX_LENGTH = 120;
+
+const LANGUAGE_OUTPUT_RULES: Record<
+	MinutesLanguage,
+	{ finalInstruction: string; tone: string }
+> = {
+	ja: {
+		finalInstruction:
+			"**The final answer must be written entirely in Japanese.**",
+		tone: "Formal, neutral Japanese suitable for official meeting minutes.",
+	},
+	en: {
+		finalInstruction:
+			"**The final answer must be written entirely in English.**",
+		tone: "Formal, neutral English suitable for official meeting minutes.",
+	},
+};
+
+const buildSystemPrompt = (minutesLanguage: MinutesLanguage) => {
+	const languageRules = LANGUAGE_OUTPUT_RULES[minutesLanguage];
+
+	return `
 **Language: English (system instructions only)**
-**The model must output all final content in Japanese.**
+${languageRules.finalInstruction}
 
 You are a highly accurate meeting-minutes editor AI specialized in administrative committee transcripts.
 You will receive a transcript in the form:
@@ -29,9 +56,9 @@ Your task is to transform the transcript into structured meeting minutes that fo
 
 ## **2. Output Language**
 
-**The final answer must be written entirely in Japanese.**
+${languageRules.finalInstruction}
 
-No English in the final answer.
+No other languages in the final answer.
 
 ## **3. No Fabrication**
 
@@ -45,9 +72,9 @@ No English in the final answer.
 
 ---
 
-# **OUTPUT FORMAT (ALL IN JAPANESE)**
+# **OUTPUT FORMAT**
 
-You must produce the following sections, in this order:
+You must produce the following sections, in this order, using the target output language.
 
 ---
 
@@ -55,7 +82,7 @@ You must produce the following sections, in this order:
 
 Requirements:
 
-* Must be **50–180 Japanese characters**.
+* Must be **50–180 characters**.
 * Concise and focused on the main points.
 * **Do NOT include timeline info**.
 * No unnecessary details.
@@ -67,7 +94,7 @@ Requirements:
 Rules:
 
 * List only items explicitly stated as「決定」「承認」「合意」など。
-* If none, write「なし」.
+* If none, write「なし」。
 
 ---
 
@@ -79,7 +106,7 @@ Rules:
 * Examples of valid signals:
   「〜を行います」「〜を進めます」「〜をお願いします」
 * No inferred or implied tasks.
-* If none, write「なし」.
+* If none, write「なし」。
 
 ---
 
@@ -126,9 +153,8 @@ If none: omit.
 
 # **STYLE REQUIREMENTS**
 
-* Formal, neutral Japanese suitable for official meeting minutes.
+* ${languageRules.tone}
 * Concise, non-redundant, and factual.
-* Never include English.
 * Never include meta-comments or reasoning.
 * Do not reorder events outside the Timeline.
 
@@ -136,19 +162,20 @@ If none: omit.
 
 **Additional Rules: Major Agenda Detailing**
 
-1. Among all items identified as agenda topics, the model must classify certain items as **Major Agenda** when they meet any of the following criteria:
+1. Among all items identified as agenda topics, the model must classify certain items as **Major Agenda** when they meet any of
+the following criteria:
 
    * They involve policies, plans, strategies, ordinances, or other core administrative matters.
    * They involve significant decisions such as awards, personnel, budget, subsidies, or plan-period settings.
    * They received long or detailed explanations in the transcript.
    * They triggered a round of questions and answers from committee members.
 
-2. For every Major Agenda item, the model must create a new section titled **「議題別概要（Detailed Agenda）」** in the final Japanese output.
+2. For every Major Agenda item, the model must create a new section titled **「議題別概要（Detailed Agenda）」** in the final output.
 
 3. The **Detailed Agenda** section must:
 
    * Contain a separate sub-summary for each Major Agenda item.
-   * Each sub-summary must be **150–300 Japanese characters**.
+   * Each sub-summary must be **150–300 characters**.
    * Summaries must capture:
      • the main purpose of the agenda
      • key points of the explanation
@@ -163,32 +190,86 @@ If none: omit.
 
 5. Non-major agenda items remain simple bullet points in the Agenda section only, without detailed summaries.
 `;
+};
+
+const normalizeMinutesLanguage = (language: unknown): MinutesLanguage => {
+	return language === "en" ? "en" : "ja";
+};
+
+const normalizeSummaryPreference = (preference: unknown): string => {
+	if (typeof preference !== "string") return "";
+	return preference.trim().slice(0, SUMMARY_PREFERENCE_MAX_LENGTH);
+};
+
+const buildPreferencePrompt = (
+	summaryPreference: string,
+	minutesLanguage: MinutesLanguage,
+): string => {
+	const instructions = normalizeSummaryPreference(summaryPreference);
+	const languageLabel = minutesLanguage === "ja" ? "日本語" : "英語";
+
+	if (!instructions) {
+		return `ユーザーからの追加指示はありません。出力言語(${languageLabel})で、与えられたフォーマットに従ってください。`;
+	}
+
+	return `ユーザーからの指示: ${instructions}\nこの希望を尊重し、出力言語(${languageLabel})で議事録をまとめてください。`;
+};
+
+const buildSummarizationMessages = (
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => [
+	{ role: "system", content: buildSystemPrompt(minutesLanguage) },
+	{
+		role: "user",
+		content: buildPreferencePrompt(summaryPreference, minutesLanguage),
+	},
+	{
+		role: "user",
+		content: `以下は会議の文字起こしテキストです。これをもとに、発言者の識別と要点の整理を行い、明確で構造化された議事録を作成してください。
+\`\`\`
+${transcript}
+\`\`\`
+
+指示に従い、議事録を作成してください。`,
+	},
+];
 
 export async function summarizeTranscript(
 	ai: AiBinding,
 	transcript: string,
+	options?: SummarizationOptions,
 ): Promise<string> {
+	const targetLanguage = normalizeMinutesLanguage(options?.minutesLanguage);
+	const summaryPreference = normalizeSummaryPreference(
+		options?.summaryPreference,
+	);
+
 	// const llmResponse = await summarizeGPTOSS120B(ai, transcript);
 	// const llmResponse = await summarizeGemma3_12B(ai, transcript);
-	const llmResponse = await summarizeGPTOSS20B(ai, transcript);
+	const llmResponse = await summarizeGPTOSS20B(
+		ai,
+		transcript,
+		targetLanguage,
+		summaryPreference,
+	);
 
 	return llmResponse;
 }
 
-const summarizeGPTOSS20B = async (ai: AiBinding, transcript: string) => {
+const summarizeGPTOSS20B = async (
+	ai: AiBinding,
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => {
 	const llmResponse = await ai.run("@cf/openai/gpt-oss-20b", {
-		input: [
-			{ role: "system", content: SYSTEM_PROMPT },
-			{
-				role: "user",
-				content: `以下は会議の文字起こしテキストです。これをもとに、発言者の識別と要点の整理を行い、明確で構造化された議事録を作成してください。
-\`\`\`
-${transcript}
-\`\`\`
-
-指示に従い、議事録を作成してください。`,
-			},
-		],
+		input: buildSummarizationMessages(
+			transcript,
+			minutesLanguage,
+			summaryPreference,
+		) as ResponseInput,
 	});
 	console.log("[Summarization] LLM response received.");
 
@@ -244,20 +325,18 @@ ${transcript}
 
 	return "";
 };
-const _summarizeGPTOSS120B = async (ai: AiBinding, transcript: string) => {
+const _summarizeGPTOSS120B = async (
+	ai: AiBinding,
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => {
 	const llmResponse = await ai.run("@cf/openai/gpt-oss-120b", {
-		input: [
-			{ role: "system", content: SYSTEM_PROMPT },
-			{
-				role: "user",
-				content: `以下は会議の文字起こしテキストです。これをもとに、発言者の識別と要点の整理を行い、明確で構造化された議事録を作成してください。
-\`\`\`
-${transcript}
-\`\`\`
-
-指示に従い、議事録を作成してください。`,
-			},
-		],
+		input: buildSummarizationMessages(
+			transcript,
+			minutesLanguage,
+			summaryPreference,
+		) as ResponseInput,
 	});
 	console.log("[Summarization] LLM response received.");
 
@@ -314,15 +393,18 @@ ${transcript}
 	return "";
 };
 
-const _summarizeGemma3_12B = async (ai: AiBinding, transcript: string) => {
+const _summarizeGemma3_12B = async (
+	ai: AiBinding,
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => {
 	const llmResponse = await ai.run("@cf/google/gemma-3-12b-it", {
-		messages: [
-			{ role: "system", content: SYSTEM_PROMPT },
-			{
-				role: "user",
-				content: transcript,
-			},
-		],
+		messages: buildSummarizationMessages(
+			transcript,
+			minutesLanguage,
+			summaryPreference,
+		),
 	});
 
 	console.log("[Summarization] Gemma 3 12B response received.");
@@ -345,17 +427,20 @@ const _summarizeGemma3_12B = async (ai: AiBinding, transcript: string) => {
 	return "";
 };
 
-const _summarizeMistral24B = async (ai: AiBinding, transcript: string) => {
+const _summarizeMistral24B = async (
+	ai: AiBinding,
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => {
 	const llmResponse = await ai.run(
 		"@cf/mistralai/mistral-small-3.1-24b-instruct",
 		{
-			messages: [
-				{ role: "system", content: SYSTEM_PROMPT },
-				{
-					role: "user",
-					content: transcript,
-				},
-			],
+			messages: buildSummarizationMessages(
+				transcript,
+				minutesLanguage,
+				summaryPreference,
+			),
 		},
 	);
 

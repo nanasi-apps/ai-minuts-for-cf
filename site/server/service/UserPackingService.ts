@@ -4,15 +4,20 @@
  * Date型のシリアライズやnull値の処理を統一的に行う
  */
 
+import type { MinutesLanguage } from "#/orpc/contracts/users";
+
 /**
  * DBから取得したユーザーエンティティの型
  */
+
 export interface UserEntity {
 	id: number;
 	email: string;
 	name: string | null;
 	avatarUrl: string | null;
 	bio: string | null;
+	summaryPreference: string;
+	minutesLanguage: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -27,9 +32,27 @@ export interface PackedUser {
 	name: string | null;
 	avatarUrl: string | null;
 	bio: string | null;
+	summaryPreference: string;
+	minutesLanguage: MinutesLanguage;
 	createdAt: string;
 	updatedAt: string;
 }
+
+export const normalizeMinutesLanguage = (
+	language: string | null | undefined,
+): MinutesLanguage => {
+	return language === "en" ? "en" : "ja";
+};
+
+export const normalizeSummaryPreference = (
+	value: string | null | undefined,
+): string => {
+	if (!value) return "";
+
+	const trimmed = value.trim();
+
+	return trimmed.length > 120 ? trimmed.slice(0, 120) : trimmed;
+};
 
 /**
  * ユーザーパッキングサービス
@@ -48,6 +71,8 @@ export class UserPackingService {
 			name: user.name,
 			avatarUrl: user.avatarUrl,
 			bio: user.bio,
+			summaryPreference: normalizeSummaryPreference(user.summaryPreference),
+			minutesLanguage: normalizeMinutesLanguage(user.minutesLanguage),
 			createdAt: user.createdAt.toISOString(),
 			updatedAt: user.updatedAt.toISOString(),
 		};
