@@ -1,7 +1,11 @@
 import { ORPCError } from "@orpc/server";
 import { authMiddleware } from "@/server/middlewares/auth";
 import { os } from "@/server/orpc/os";
-import { userPackingService } from "@/server/service/UserPackingService";
+import {
+	normalizeMinutesLanguage,
+	type UserEntity,
+	userPackingService,
+} from "@/server/service/UserPackingService";
 
 /**
  * ユーザー関連のハンドラー実装
@@ -16,9 +20,9 @@ export default {
 		// context.userId は JWT認証ミドルウェアで設定される
 		const userId = context.userId;
 
-		const user = await context.db.user.findUnique({
+		const user = (await context.db.user.findUnique({
 			where: { id: userId },
-		});
+		})) as UserEntity | null;
 
 		// ユーザーが見つからない場合（通常は発生しないが、削除済みの場合など）
 		if (!user) {
@@ -36,9 +40,9 @@ export default {
 	 * 認証は不要
 	 */
 	getUser: os.users.getUser.handler(async ({ input, context }) => {
-		const user = await context.db.user.findUnique({
+		const user = (await context.db.user.findUnique({
 			where: { id: input.id },
-		});
+		})) as UserEntity | null;
 
 		if (!user) {
 			throw new ORPCError("NOT_FOUND", {
@@ -59,9 +63,9 @@ export default {
 			const userId = context.userId;
 
 			// 更新対象のユーザーが存在するか確認
-			const existingUser = await context.db.user.findUnique({
+			const existingUser = (await context.db.user.findUnique({
 				where: { id: userId },
-			});
+			})) as UserEntity | null;
 
 			if (!existingUser) {
 				throw new ORPCError("NOT_FOUND", {
@@ -87,10 +91,10 @@ export default {
 				updateData.bio = input.bio;
 			}
 
-			const updatedUser = await context.db.user.update({
+			const updatedUser = (await context.db.user.update({
 				where: { id: userId },
 				data: updateData,
-			});
+			})) as UserEntity;
 
 			return userPackingService.pack(updatedUser);
 		}),
@@ -103,9 +107,9 @@ export default {
 		.handler(async ({ context }) => {
 			const userId = context.userId;
 
-			const user = await context.db.user.findUnique({
+			const user = (await context.db.user.findUnique({
 				where: { id: userId },
-			});
+			})) as UserEntity | null;
 
 			if (!user) {
 				throw new ORPCError("NOT_FOUND", {
@@ -115,7 +119,7 @@ export default {
 
 			return {
 				summaryPreference: user.summaryPreference,
-				minutesLanguage: user.minutesLanguage,
+				minutesLanguage: normalizeMinutesLanguage(user.minutesLanguage),
 			};
 		}),
 
@@ -127,17 +131,17 @@ export default {
 		.handler(async ({ input, context }) => {
 			const userId = context.userId;
 
-			const updatedUser = await context.db.user.update({
+			const updatedUser = (await context.db.user.update({
 				where: { id: userId },
 				data: {
 					summaryPreference: input.summaryPreference,
 					minutesLanguage: input.minutesLanguage,
 				},
-			});
+			})) as UserEntity;
 
 			return {
 				summaryPreference: updatedUser.summaryPreference,
-				minutesLanguage: updatedUser.minutesLanguage,
+				minutesLanguage: normalizeMinutesLanguage(updatedUser.minutesLanguage),
 			};
 		}),
 };

@@ -12,13 +12,15 @@ definePageMeta({
 
 const api = useApi();
 
-const languageOptions = [
+type MinutesLanguage = "ja" | "en";
+
+const languageOptions: { value: MinutesLanguage; label: string }[] = [
 	{ value: "ja", label: "日本語" },
 	{ value: "en", label: "English" },
 ];
 
 const summaryPreference = ref("");
-const minutesLanguage = ref("ja");
+const minutesLanguage = ref<MinutesLanguage>("ja");
 const isSaving = ref(false);
 const saveMessage = ref("");
 const saveError = ref("");

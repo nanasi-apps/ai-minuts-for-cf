@@ -7,6 +7,8 @@
 /**
  * DBから取得したユーザーエンティティの型
  */
+export type MinutesLanguage = "ja" | "en";
+
 export interface UserEntity {
 	id: number;
 	email: string;
@@ -30,10 +32,14 @@ export interface PackedUser {
 	avatarUrl: string | null;
 	bio: string | null;
 	summaryPreference: string;
-	minutesLanguage: string;
+	minutesLanguage: MinutesLanguage;
 	createdAt: string;
 	updatedAt: string;
 }
+
+export const normalizeMinutesLanguage = (language: string): MinutesLanguage => {
+	return language === "en" ? "en" : "ja";
+};
 
 /**
  * ユーザーパッキングサービス
@@ -53,7 +59,7 @@ export class UserPackingService {
 			avatarUrl: user.avatarUrl,
 			bio: user.bio,
 			summaryPreference: user.summaryPreference,
-			minutesLanguage: user.minutesLanguage,
+			minutesLanguage: normalizeMinutesLanguage(user.minutesLanguage),
 			createdAt: user.createdAt.toISOString(),
 			updatedAt: user.updatedAt.toISOString(),
 		};
