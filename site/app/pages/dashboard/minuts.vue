@@ -200,7 +200,7 @@ const uploadToR2 = (
 }
 
 .upload-panel {
-  @apply bg-white rounded-xl border border-gray-200 p-12 flex flex-col items-center justify-center h-[40em];
+  @apply bg-white rounded-xl border border-gray-200 p-6 md:p-12 flex flex-col items-center justify-center min-h-[400px] md:h-[40em];
 
   @media (prefers-color-scheme: dark) {
     @apply bg-stone-900 border-gray-800;

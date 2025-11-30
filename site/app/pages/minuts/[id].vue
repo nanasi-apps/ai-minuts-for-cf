@@ -54,7 +54,7 @@ const regenerateSummary = async () => {
 
 const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
 
-const mediaPlayer = ref<InstanceType<typeof MediaPlayer> | null>(null);
+const mediaPlayer = useTemplateRef("mediaPlayer");
 const currentTime = ref(0);
 
 const handleSeek = (time: number) => {
@@ -82,7 +82,6 @@ const onConfirmDelete = async () => {
 </script>
 
 <template>
-  <PageContainer size="narrow">
     <MinutsDetailSkeleton v-if="status === 'pending'" />
 
     <div v-else-if="minuts" class="detail-content">
@@ -153,26 +152,25 @@ const onConfirmDelete = async () => {
       type="danger"
       @confirm="onConfirmDelete"
     />
-  </PageContainer>
 </template>
 
 <style scoped>
 @reference "@/app/assets/index.css";
 
 .detail-content {
-  @apply space-y-8 h-full;
+  @apply space-y-6 lg:space-y-8 h-full;
 }
 
 .detail-header {
-  @apply flex justify-between items-start;
+  @apply flex flex-col md:flex-row justify-between items-start gap-4;
 }
 
 .detail-title {
-  @apply space-y-2;
+  @apply space-y-2 w-full md:w-auto;
 }
 
 .detail-heading {
-  @apply text-3xl font-bold text-gray-900;
+  @apply text-2xl md:text-3xl font-bold text-gray-900;
 
   @media (prefers-color-scheme: dark) {
     @apply text-white;
@@ -180,7 +178,7 @@ const onConfirmDelete = async () => {
 }
 
 .detail-meta {
-  @apply flex items-center gap-4 text-sm text-gray-500;
+  @apply flex flex-wrap items-center gap-4 text-sm text-gray-500;
 
   @media (prefers-color-scheme: dark) {
     @apply text-gray-400;
@@ -188,15 +186,15 @@ const onConfirmDelete = async () => {
 }
 
 .content-section {
-  @apply flex gap-6 h-[calc(100vh-12rem)];
+  @apply flex flex-col lg:flex-row gap-6 h-auto lg:h-[calc(100vh-12rem)];
 }
 
 .summary-card {
-  @apply flex-1 h-full overflow-y-auto;
+  @apply w-full lg:flex-1 h-[500px] lg:h-full overflow-y-auto;
 }
 
 .content-right {
-  @apply flex flex-col gap-6 flex-1 h-full overflow-hidden;
+  @apply flex flex-col gap-6 w-full lg:flex-1 h-auto lg:h-full overflow-hidden;
 }
 
 .media-player {
@@ -204,6 +202,6 @@ const onConfirmDelete = async () => {
 }
 
 .transcript-card {
-  @apply flex-1 overflow-y-auto min-h-0;
+  @apply w-full h-[500px] lg:flex-1 overflow-y-auto min-h-0;
 }
 </style>

@@ -60,7 +60,7 @@ onUnmounted(() => {
         :src="subtitleUrl"
         default
       />
-      お使いのブラウザは動画タグをサポートしていません。
+      お使いのブラウザは動画をサポートしていません。
     </video>
   </div>
 </template>

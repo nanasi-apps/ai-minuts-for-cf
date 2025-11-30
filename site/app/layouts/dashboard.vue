@@ -77,7 +77,7 @@ const pageSize = computed(
 }
 
 main {
-  @apply flex-1 p-4;
+  @apply flex-1;
 }
 
 .title {

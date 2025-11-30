@@ -23,7 +23,7 @@ const { formatDate } = useDateFormat();
 <template>
   <NuxtLink 
     :to="`/minuts/${minuts.id}`"
-    class="group bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all hover:-translate-y-1 relative overflow-hidden"
+    class="group bg-white dark:bg-stone-900  rounded-2xl p-6 shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all hover:-translate-y-1 relative overflow-hidden"
   >
     <div class="absolute top-0 right-0 p-4">
         <StatusBadge :status="minuts.status" />

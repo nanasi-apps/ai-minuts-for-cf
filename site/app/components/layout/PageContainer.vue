@@ -25,6 +25,8 @@ defineExpose({ sizeClass });
 
 .page-container {
   @apply p-8 mx-auto h-full w-full;
-  @apply max-w-7xl;
+  @apply max-w-[100em];
+  @apply min-w-sm;
 }
+
 </style>

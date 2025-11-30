@@ -103,7 +103,7 @@ watch(
 @reference "@/app/assets/index.css";
 
 .summary-card {
-  @apply bg-white rounded-2xl p-6 shadow-sm border border-gray-100;
+  @apply bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col;
 
   @media (prefers-color-scheme: dark) {
     @apply bg-stone-900 border-gray-800;
@@ -111,7 +111,7 @@ watch(
 }
 
 .card-header {
-  @apply flex justify-between items-center mb-4;
+  @apply flex justify-between items-center mb-4 shrink-0;
 }
 
 .card-title {
@@ -123,7 +123,7 @@ watch(
 }
 
 .summary-content {
-  @apply max-w-none text-gray-700;
+  @apply max-w-none text-gray-700 flex-1 overflow-y-auto;
 
   @media (prefers-color-scheme: dark) {
     @apply text-gray-300;

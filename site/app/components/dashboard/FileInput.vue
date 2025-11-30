@@ -63,7 +63,7 @@ const onDrop = (event: DragEvent) => {
 @reference "@/app/assets/index.css";
 
 .drop-zone {
-  @apply relative w-full h-[40em] rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center text-center overflow-hidden;
+  @apply relative w-full h-auto min-h-[300px] md:h-[40em] rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center text-center overflow-hidden;
 
   &:hover {
     @apply border-blue-400 bg-blue-50/50;
