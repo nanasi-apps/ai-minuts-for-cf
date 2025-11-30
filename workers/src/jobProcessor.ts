@@ -1,6 +1,22 @@
 import type { Job } from "../utils/queueTypes";
-import { summarizeTranscript } from "./summarization";
+import { type MinutesLanguage, summarizeTranscript } from "./summarization";
 import { transcribeAudio } from "./transcription";
+
+const SUMMARY_PREFERENCE_MAX_LENGTH = 120;
+
+type UserSettings = {
+	minutesLanguage: MinutesLanguage;
+	summaryPreference: string;
+};
+
+const normalizeMinutesLanguage = (language: unknown): MinutesLanguage => {
+	return language === "en" ? "en" : "ja";
+};
+
+const normalizeSummaryPreference = (preference: unknown): string => {
+	if (typeof preference !== "string") return "";
+	return preference.trim().slice(0, SUMMARY_PREFERENCE_MAX_LENGTH);
+};
 
 async function fetchMinutsRecord(env: Env, minutsId: number) {
 	const record = await env.ai_minuts
@@ -13,6 +29,23 @@ async function fetchMinutsRecord(env: Env, minutsId: number) {
 	}
 
 	return record;
+}
+
+async function fetchUserSettings(
+	env: Env,
+	userId: number,
+): Promise<UserSettings> {
+	const record = await env.ai_minuts
+		.prepare("SELECT minutesLanguage, summaryPreference FROM User WHERE id = ?")
+		.bind(userId)
+		.first();
+
+	const minutesLanguage = normalizeMinutesLanguage(record?.minutesLanguage);
+	const summaryPreference = normalizeSummaryPreference(
+		record?.summaryPreference,
+	);
+
+	return { minutesLanguage, summaryPreference };
 }
 
 async function ensureR2Object(env: Env, videoKey: string) {
@@ -69,6 +102,7 @@ async function buildTranscript(
 
 export async function processMinutsJob(env: Env, job: Job): Promise<void> {
 	const minuts = await fetchMinutsRecord(env, job.payload.minutsId);
+	const userSettings = await fetchUserSettings(env, minuts.userId as number);
 	const audioKey = minuts.audioKey as string | null;
 	const videoKey = minuts.videoKey as string;
 	const targetKey = audioKey || videoKey;
@@ -91,7 +125,7 @@ export async function processMinutsJob(env: Env, job: Job): Promise<void> {
 	);
 
 	console.log("[Processor] Starting summarization...");
-	const summary = await summarizeTranscript(env.AI, transcript);
+	const summary = await summarizeTranscript(env.AI, transcript, userSettings);
 	console.log("[Processor] Summarization complete.");
 
 	await completeMinuts(env, job.payload.minutsId, transcript, summary, vtt);
