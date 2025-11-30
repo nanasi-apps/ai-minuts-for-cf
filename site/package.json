@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "prisma generate && nuxt build",
+		"build": "pnpm generate && nuxt build",
 		"dev": "nuxt dev",
 		"generate": "prisma generate && nuxt generate && pnpm cf-typegen",
 		"preview": "nuxt preview",

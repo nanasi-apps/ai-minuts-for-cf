@@ -4,6 +4,7 @@ export interface Job {
 	payload: {
 		minutsId: number;
 		action?: "transcribe_and_summarize" | "summarize_only";
+		fileUrl?: string;
 	};
 	createdAt: number;
 	updatedAt: number;

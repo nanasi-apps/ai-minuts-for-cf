@@ -12,7 +12,8 @@
 		"lint-format": "biome check",
 		"lint-format:fix": "biome check --write",
 		"deploy": "pnpm run -r deploy",
-		"prepare": "husky"
+		"prepare": "husky",
+		"generate": "pnpm --r generate"
 	},
 	"dependencies": {
 		"@types/node": "^24.10.1",

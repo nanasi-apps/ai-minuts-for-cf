@@ -50,6 +50,7 @@ async function buildTranscript(
 	action: Job["payload"]["action"],
 	object: R2ObjectBody,
 	existingTranscript: string | null,
+	fileUrl?: string,
 ) {
 	if (action === "summarize_only") {
 		if (!existingTranscript) {
@@ -62,7 +63,7 @@ async function buildTranscript(
 	}
 
 	console.log("[Processor] Starting transcription with chunking (Whisper)...");
-	return transcribeAudio(object, env.AI);
+	return transcribeAudio(object, env, fileUrl);
 }
 
 export async function processMinutsJob(env: Env, job: Job): Promise<void> {
@@ -80,6 +81,7 @@ export async function processMinutsJob(env: Env, job: Job): Promise<void> {
 		job.payload.action || "transcribe_and_summarize",
 		object,
 		minuts.transcript as string,
+		job.payload.fileUrl,
 	);
 
 	console.log("[Processor] Starting summarization...");

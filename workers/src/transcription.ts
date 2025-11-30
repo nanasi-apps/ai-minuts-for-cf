@@ -28,14 +28,54 @@ interface TranscriptionSegment {
  */
 export async function transcribeAudio(
 	object: R2ObjectBody,
-	ai: AiBinding,
+	env: Env,
+	fileUrl?: string,
 ): Promise<string> {
 	if (!object.body) {
 		throw new Error("Object body is null");
 	}
 
-	const audioBuffer = await object.arrayBuffer();
+	const ai = env.AI;
 	const contentType = object.httpMetadata?.contentType || "audio/mpeg";
+	let audioBuffer: ArrayBuffer;
+
+	if (
+		contentType.startsWith("video/") &&
+		fileUrl &&
+		env.STREAM_TRANSFORM_DOMAIN
+	) {
+		const domain = env.STREAM_TRANSFORM_DOMAIN;
+		const transformUrl = `https://${domain}/cdn-cgi/media/mode=audio/${fileUrl}`;
+		console.log(`[Transcription] Using Stream Transform: ${transformUrl}`);
+		try {
+			const res = await fetch(transformUrl);
+			if (!res.ok) {
+				console.error(
+					`[Transcription] Stream Transform failed with status ${res.status}. Falling back to direct read.`,
+				);
+				audioBuffer = await object.arrayBuffer();
+			} else {
+				audioBuffer = await res.arrayBuffer();
+				console.log(
+					`[Transcription] Stream Transform successful. Audio size: ${audioBuffer.byteLength}`,
+				);
+			}
+		} catch (e) {
+			console.error(
+				"[Transcription] Stream Transform error. Falling back to direct read.",
+				e,
+			);
+			audioBuffer = await object.arrayBuffer();
+		}
+	} else {
+		if (contentType.startsWith("video/")) {
+			console.warn(
+				"[Transcription] Video detected but Stream Transform not configured (missing STREAM_TRANSFORM_DOMAIN or fileUrl). Processing as is.",
+			);
+		}
+		audioBuffer = await object.arrayBuffer();
+	}
+
 	console.log(
 		`[Transcription] Audio size: ${audioBuffer.byteLength}, Content-Type: ${contentType}`,
 	);

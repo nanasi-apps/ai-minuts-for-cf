@@ -1,4 +1,4 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ORPCError } from "@orpc/server";
 import { v4 as uuidv4 } from "uuid";
@@ -96,8 +96,18 @@ export default {
 
 			const { QUEUE_SERVICE } = cfEnv as { QUEUE_SERVICE: Fetcher };
 
+			// Generate presigned URL for the worker to access the file
+			const config = useRuntimeConfig();
+			const s3 = getS3Client();
+			const command = new GetObjectCommand({
+				Bucket: config.r2BucketName,
+				Key: minuts.videoKey,
+			});
+			const fileUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour
+
 			const payload = {
 				minutsId,
+				fileUrl,
 			};
 
 			await QUEUE_SERVICE.fetch("http://worker/enqueue", {

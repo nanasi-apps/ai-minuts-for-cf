@@ -12,8 +12,12 @@ export default {
 		const url = new URL(request.url);
 
 		if (url.pathname === "/enqueue" && request.method === "POST") {
-			const body = (await request.json()) as { minutsId: number };
-			const minutsId = body.minutsId;
+			const body = (await request.json()) as {
+				minutsId: number;
+				action?: Job["payload"]["action"];
+				fileUrl?: string;
+			};
+			const { minutsId, action, fileUrl } = body;
 			console.log("Enqueue request for minutsId:", minutsId);
 
 			if (!minutsId) {
@@ -25,7 +29,7 @@ export default {
 			const job: Job = {
 				id,
 				status: "waiting",
-				payload: { minutsId },
+				payload: { minutsId, action, fileUrl },
 				createdAt: Date.now(),
 				updatedAt: Date.now(),
 				retryCount: 0,

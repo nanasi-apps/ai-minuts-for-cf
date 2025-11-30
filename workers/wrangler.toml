@@ -33,3 +33,6 @@ remote = true
 
 [observability]
 enabled = true
+
+[vars]
+STREAM_TRANSFORM_DOMAIN = "ai-minuts.nanasi-apps.xyz"
