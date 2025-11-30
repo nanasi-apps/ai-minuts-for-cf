@@ -38,8 +38,20 @@ export interface PackedUser {
 	updatedAt: string;
 }
 
-export const normalizeMinutesLanguage = (language: string): MinutesLanguage => {
+export const normalizeMinutesLanguage = (
+	language: string | null | undefined,
+): MinutesLanguage => {
 	return language === "en" ? "en" : "ja";
+};
+
+export const normalizeSummaryPreference = (
+	value: string | null | undefined,
+): string => {
+	if (!value) return "";
+
+	const trimmed = value.trim();
+
+	return trimmed.length > 120 ? trimmed.slice(0, 120) : trimmed;
 };
 
 /**
@@ -59,7 +71,7 @@ export class UserPackingService {
 			name: user.name,
 			avatarUrl: user.avatarUrl,
 			bio: user.bio,
-			summaryPreference: user.summaryPreference,
+			summaryPreference: normalizeSummaryPreference(user.summaryPreference),
 			minutesLanguage: normalizeMinutesLanguage(user.minutesLanguage),
 			createdAt: user.createdAt.toISOString(),
 			updatedAt: user.updatedAt.toISOString(),

@@ -3,6 +3,7 @@ import { authMiddleware } from "@/server/middlewares/auth";
 import { os } from "@/server/orpc/os";
 import {
 	normalizeMinutesLanguage,
+	normalizeSummaryPreference,
 	type UserEntity,
 	userPackingService,
 } from "@/server/service/UserPackingService";
@@ -118,7 +119,7 @@ export default {
 			}
 
 			return {
-				summaryPreference: user.summaryPreference,
+				summaryPreference: normalizeSummaryPreference(user.summaryPreference),
 				minutesLanguage: normalizeMinutesLanguage(user.minutesLanguage),
 			};
 		}),
@@ -134,13 +135,17 @@ export default {
 			const updatedUser = (await context.db.user.update({
 				where: { id: userId },
 				data: {
-					summaryPreference: input.summaryPreference,
+					summaryPreference: normalizeSummaryPreference(
+						input.summaryPreference,
+					),
 					minutesLanguage: input.minutesLanguage,
 				},
 			})) as UserEntity;
 
 			return {
-				summaryPreference: updatedUser.summaryPreference,
+				summaryPreference: normalizeSummaryPreference(
+					updatedUser.summaryPreference,
+				),
 				minutesLanguage: normalizeMinutesLanguage(updatedUser.minutesLanguage),
 			};
 		}),
