@@ -115,9 +115,11 @@ model Minuts {
   id        Int      @id @default(autoincrement())
   title     String
   videoKey  String
+  audioKey  String?
   status    String   @default("UPLOADING") // UPLOADING, PROCESSING, COMPLETED, FAILED
   summary   String?
   transcript String?
+  subtitle   String?
   userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

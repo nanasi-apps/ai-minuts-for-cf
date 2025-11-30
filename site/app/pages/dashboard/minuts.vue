@@ -11,37 +11,85 @@ definePageMeta({
 	middleware: ["auth"],
 });
 
+import { extractAudioFromVideo } from "@/app/utils/audio";
+
 const api = useApi();
 const { addToast } = useToast();
 const router = useRouter();
 const isUploading = ref(false);
 const uploadProgress = ref(0);
 const errorMessage = ref<string | null>(null);
+const statusMessage = ref("アップロード中...");
 
 const handleFileSelect = async (file: File) => {
 	if (isUploading.value) return;
 
 	// Validate file type client-side as well
-	if (!["video/mp4", "audio/mpeg"].includes(file.type)) {
+	if (!["video/mp4", "audio/mpeg", "audio/wav"].includes(file.type)) {
 		errorMessage.value =
-			"対応していないファイル形式です。MP4またはMP3を選択してください。";
+			"対応していないファイル形式です。MP4, MP3, WAVを選択してください。";
 		return;
 	}
 
 	errorMessage.value = null;
 	isUploading.value = true;
 	uploadProgress.value = 0;
+	statusMessage.value = "準備中...";
 
 	try {
+		let audioBlob: Blob | null = null;
+		let audioFileName: string | null = null;
+		let audioContentType: "audio/mpeg" | null = null;
+
+		// Extract audio if video
+		if (file.type.startsWith("video/")) {
+			statusMessage.value = "動画から音声を抽出中...";
+			try {
+				audioBlob = await extractAudioFromVideo(file);
+				audioFileName = `${file.name.replace(/\.[^/.]+$/, "")}.mp3`;
+				audioContentType = "audio/mpeg";
+				addToast("音声の抽出に成功しました", "success");
+			} catch (e) {
+				console.error("Audio extraction failed:", e);
+				addToast(
+					"音声抽出に失敗しました。動画のみアップロードします。",
+					"info",
+				);
+			}
+		}
+
+		statusMessage.value = "アップロード中...";
+
 		// 1. Generate Presigned URL
-		const { uploadUrl, minutsId } = await api.minuts.generatePresignedUrl({
-			filename: file.name,
-			contentType: file.type as "video/mp4" | "audio/mpeg",
-			fileSize: file.size,
-		});
+		const { uploadUrl, minutsId, audioUploadUrl } =
+			await api.minuts.generatePresignedUrl({
+				filename: file.name,
+				contentType: file.type as "video/mp4" | "audio/mpeg" | "audio/wav",
+				fileSize: file.size,
+				audio:
+					audioBlob && audioFileName && audioContentType
+						? {
+								filename: audioFileName,
+								contentType: audioContentType,
+								fileSize: audioBlob.size,
+							}
+						: undefined,
+			});
 
 		// 2. Upload to R2
-		await uploadToR2(uploadUrl, file);
+		// Upload main file (Video or Audio)
+		const uploadPromises = [uploadToR2(uploadUrl, file, file.type)];
+
+		// Upload extracted audio if exists
+		if (audioUploadUrl && audioBlob && audioContentType) {
+			uploadPromises.push(
+				uploadToR2(audioUploadUrl, audioBlob as File, audioContentType),
+			);
+		}
+
+		await Promise.all(uploadPromises);
+
+		statusMessage.value = "処理を開始中...";
 
 		// 3. Process
 		await api.minuts.process({ minutsId });
@@ -61,7 +109,11 @@ const handleFileSelect = async (file: File) => {
 	}
 };
 
-const uploadToR2 = (url: string, file: File): Promise<void> => {
+const uploadToR2 = (
+	url: string,
+	file: File | Blob,
+	contentType: string,
+): Promise<void> => {
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
 
@@ -84,7 +136,7 @@ const uploadToR2 = (url: string, file: File): Promise<void> => {
 		});
 
 		xhr.open("PUT", url);
-		xhr.setRequestHeader("Content-Type", file.type);
+		xhr.setRequestHeader("Content-Type", contentType);
 		xhr.send(file);
 	});
 };
@@ -109,7 +161,7 @@ const uploadToR2 = (url: string, file: File): Promise<void> => {
         </div>
 
         <div class="upload-heading">
-          <h3 class="upload-title">アップロード中...</h3>
+          <h3 class="upload-title">{{ statusMessage }}</h3>
           <p class="upload-caption">ブラウザを閉じないでください</p>
         </div>
 

@@ -27,11 +27,26 @@ export default {
 
 				const uploadUrl = await getSignedUrl(s3, command, { expiresIn });
 
+				let audioUploadUrl: string | undefined;
+				let audioKey: string | undefined;
+
+				if (input.audio) {
+					audioKey = `${context.userId}/${uuidv4()}-${input.audio.filename}`;
+					const audioCommand = new PutObjectCommand({
+						Bucket: config.r2BucketName,
+						Key: audioKey,
+						ContentType: input.audio.contentType,
+						ContentLength: input.audio.fileSize,
+					});
+					audioUploadUrl = await getSignedUrl(s3, audioCommand, { expiresIn });
+				}
+
 				// 議事録レコードを作成
 				const minuts = await context.db.minuts.create({
 					data: {
 						title: input.filename, // とりあえずファイル名をタイトルにする
 						videoKey: key,
+						audioKey: audioKey,
 						userId: context.userId,
 						status: "UPLOADING",
 					},
@@ -40,6 +55,8 @@ export default {
 				return {
 					uploadUrl,
 					key,
+					audioUploadUrl,
+					audioKey,
 					minutsId: minuts.id,
 				};
 			} catch (error) {
@@ -101,7 +118,7 @@ export default {
 			const s3 = getS3Client();
 			const command = new GetObjectCommand({
 				Bucket: config.r2BucketName,
-				Key: minuts.videoKey,
+				Key: minuts.audioKey || minuts.videoKey,
 			});
 			const fileUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour
 
@@ -160,6 +177,7 @@ export default {
 			status: minuts.status,
 			summary: minuts.summary ?? null,
 			transcript: minuts.transcript ?? null,
+			subtitle: minuts.subtitle ?? null,
 			videoUrl,
 			createdAt: minuts.createdAt.toISOString(),
 		};

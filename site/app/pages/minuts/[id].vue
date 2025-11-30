@@ -115,6 +115,7 @@ const onConfirmDelete = async () => {
             <MediaPlayer
                 v-if="minuts.videoUrl"
                 :src="minuts.videoUrl"
+                :subtitle="minuts.subtitle"
                 class="media-player"
             />
             <TranscriptCard

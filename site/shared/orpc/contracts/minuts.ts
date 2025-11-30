@@ -5,14 +5,23 @@ const generatePresignedUrl = oc
 	.input(
 		z.object({
 			filename: z.string().min(1),
-			contentType: z.enum(["video/mp4", "audio/mpeg"]),
+			contentType: z.enum(["video/mp4", "audio/mpeg", "audio/wav"]),
 			fileSize: z.number().int().positive(),
+			audio: z
+				.object({
+					filename: z.string().min(1),
+					contentType: z.enum(["audio/wav", "audio/mpeg"]),
+					fileSize: z.number().int().positive(),
+				})
+				.optional(),
 		}),
 	)
 	.output(
 		z.object({
 			uploadUrl: z.string().url(),
 			key: z.string(),
+			audioUploadUrl: z.string().url().optional(),
+			audioKey: z.string().optional(),
 			minutsId: z.number(),
 		}),
 	);
@@ -62,6 +71,7 @@ const get = oc
 			status: z.string(),
 			summary: z.string().nullable(),
 			transcript: z.string().nullable(),
+			subtitle: z.string().nullable(),
 			videoUrl: z.string().nullable(),
 			createdAt: z.string(),
 		}),

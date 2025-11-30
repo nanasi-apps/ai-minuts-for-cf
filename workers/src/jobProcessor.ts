@@ -36,12 +36,13 @@ async function completeMinuts(
 	minutsId: number,
 	transcript: string,
 	summary: string,
+	subtitle: string | null,
 ) {
 	await env.ai_minuts
 		.prepare(
-			"UPDATE Minuts SET status = ?, transcript = ?, summary = ? WHERE id = ?",
+			"UPDATE Minuts SET status = ?, transcript = ?, summary = ?, subtitle = ? WHERE id = ?",
 		)
-		.bind("COMPLETED", transcript, summary, minutsId)
+		.bind("COMPLETED", transcript, summary, subtitle, minutsId)
 		.run();
 }
 
@@ -50,7 +51,7 @@ async function buildTranscript(
 	action: Job["payload"]["action"],
 	object: R2ObjectBody,
 	existingTranscript: string | null,
-	fileUrl?: string,
+	existingSubtitle: string | null,
 ) {
 	if (action === "summarize_only") {
 		if (!existingTranscript) {
@@ -59,34 +60,39 @@ async function buildTranscript(
 		console.log(
 			"[Processor] Skipping transcription, using existing transcript.",
 		);
-		return existingTranscript;
+		return { transcript: existingTranscript, vtt: existingSubtitle };
 	}
 
 	console.log("[Processor] Starting transcription with chunking (Whisper)...");
-	return transcribeAudio(object, env, fileUrl);
+	return transcribeAudio(object, env);
 }
 
 export async function processMinutsJob(env: Env, job: Job): Promise<void> {
 	const minuts = await fetchMinutsRecord(env, job.payload.minutsId);
+	const audioKey = minuts.audioKey as string | null;
 	const videoKey = minuts.videoKey as string;
-	console.log(`[Processor] Found videoKey: ${videoKey}`);
+	const targetKey = audioKey || videoKey;
 
-	const object = await ensureR2Object(env, videoKey);
+	console.log(
+		`[Processor] Found targetKey: ${targetKey} (Audio: ${!!audioKey})`,
+	);
+
+	const object = await ensureR2Object(env, targetKey);
 	console.log(`[Processor] File exists in R2, size: ${object.size}`);
 
 	await updateStatus(env, job.payload.minutsId, "PROCESSING");
 
-	const transcript = await buildTranscript(
+	const { transcript, vtt } = await buildTranscript(
 		env,
 		job.payload.action || "transcribe_and_summarize",
 		object,
 		minuts.transcript as string,
-		job.payload.fileUrl,
+		minuts.subtitle as string | null,
 	);
 
 	console.log("[Processor] Starting summarization...");
 	const summary = await summarizeTranscript(env.AI, transcript);
 	console.log("[Processor] Summarization complete.");
 
-	await completeMinuts(env, job.payload.minutsId, transcript, summary);
+	await completeMinuts(env, job.payload.minutsId, transcript, summary, vtt);
 }

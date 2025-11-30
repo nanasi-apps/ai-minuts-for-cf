@@ -1,7 +1,21 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
 	src: string;
+	subtitle?: string | null;
 }>();
+
+const subtitleUrl = computed(() => {
+	if (!props.subtitle) return null;
+	const blob = new Blob([props.subtitle], { type: "text/vtt" });
+	return URL.createObjectURL(blob);
+});
+
+// Cleanup URL on unmount
+onUnmounted(() => {
+	if (subtitleUrl.value) {
+		URL.revokeObjectURL(subtitleUrl.value);
+	}
+});
 </script>
 
 <template>
@@ -11,7 +25,16 @@ defineProps<{
       controls
       class="media-player"
       playsinline
+      crossorigin="anonymous"
     >
+      <track
+        v-if="subtitleUrl"
+        kind="subtitles"
+        label="Japanese"
+        srclang="ja"
+        :src="subtitleUrl"
+        default
+      />
       お使いのブラウザは動画タグをサポートしていません。
     </video>
   </div>
