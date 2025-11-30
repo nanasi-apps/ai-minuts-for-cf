@@ -3,6 +3,7 @@ import type { InferContractRouterOutputs } from "@orpc/contract";
 import type { contract } from "#/orpc";
 import Button from "@/app/components/general/Button.vue";
 import PageContainer from "@/app/components/layout/PageContainer.vue";
+import MediaPlayer from "@/app/components/minuts/MediaPlayer.vue";
 import MinutsDetailSkeleton from "@/app/components/minuts/MinutsDetailSkeleton.vue";
 import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
 import SummaryCard from "@/app/components/minuts/SummaryCard.vue";
@@ -101,17 +102,30 @@ const onConfirmDelete = async () => {
             </div>
         </div>
 
-        <SummaryCard
-            v-if="minuts.summary"
-            :summary="minuts.summary"
-            :is-processing="minuts.status === 'PROCESSING'"
-            @regenerate="regenerateSummary"
-        />
+        <div class="content-section">
+          <SummaryCard
+              v-if="minuts.summary"
+              :summary="minuts.summary"
+              :is-processing="minuts.status === 'PROCESSING'"
+              @regenerate="regenerateSummary"
+              class="summary-card"
+          />
+          
+          <div class="content-right">
+            <MediaPlayer
+                v-if="minuts.videoUrl"
+                :src="minuts.videoUrl"
+                class="media-player"
+            />
+            <TranscriptCard
+                v-if="minuts.transcript"
+                :transcript="minuts.transcript"
+                class="transcript-card"
+            />
+          </div>
+        </div>
 
-        <TranscriptCard
-            v-if="minuts.transcript"
-            :transcript="minuts.transcript"
-        />
+
     </div>
 
     <ConfirmDialog
@@ -129,7 +143,7 @@ const onConfirmDelete = async () => {
 @reference "@/app/assets/index.css";
 
 .detail-content {
-  @apply space-y-8;
+  @apply space-y-8 h-full;
 }
 
 .detail-header {
@@ -154,5 +168,25 @@ const onConfirmDelete = async () => {
   @media (prefers-color-scheme: dark) {
     @apply text-gray-400;
   }
+}
+
+.content-section {
+  @apply flex gap-6 h-[calc(100vh-12rem)];
+}
+
+.summary-card {
+  @apply flex-1 h-full overflow-y-auto;
+}
+
+.content-right {
+  @apply flex flex-col gap-6 flex-1 h-full overflow-hidden;
+}
+
+.media-player {
+  @apply shrink-0;
+}
+
+.transcript-card {
+  @apply flex-1 overflow-y-auto min-h-0;
 }
 </style>

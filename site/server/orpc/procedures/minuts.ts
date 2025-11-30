@@ -138,12 +138,29 @@ export default {
 			});
 		}
 
+		const config = useRuntimeConfig();
+		const s3 = getS3Client();
+		let videoUrl: string | null = null;
+
+		if (minuts.videoKey) {
+			try {
+				const command = new GetObjectCommand({
+					Bucket: config.r2BucketName,
+					Key: minuts.videoKey,
+				});
+				videoUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour
+			} catch (e) {
+				console.error("Failed to generate presigned URL:", e);
+			}
+		}
+
 		return {
 			id: minuts.id,
 			title: minuts.title,
 			status: minuts.status,
 			summary: minuts.summary ?? null,
 			transcript: minuts.transcript ?? null,
+			videoUrl,
 			createdAt: minuts.createdAt.toISOString(),
 		};
 	}),

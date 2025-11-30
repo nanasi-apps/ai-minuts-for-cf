@@ -24,14 +24,7 @@ defineExpose({ sizeClass });
 @reference "@/app/assets/index.css";
 
 .page-container {
-  @apply p-8 mx-auto;
-}
-
-.page-container-wide {
+  @apply p-8 mx-auto h-full w-full;
   @apply max-w-7xl;
-}
-
-.page-container-narrow {
-  @apply max-w-4xl;
 }
 </style>

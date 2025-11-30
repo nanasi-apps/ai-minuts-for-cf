@@ -62,6 +62,7 @@ const get = oc
 			status: z.string(),
 			summary: z.string().nullable(),
 			transcript: z.string().nullable(),
+			videoUrl: z.string().nullable(),
 			createdAt: z.string(),
 		}),
 	);

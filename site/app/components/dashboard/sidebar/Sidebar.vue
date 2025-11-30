@@ -23,7 +23,7 @@ const handleLogout = () => {
 </script>
 
 <template>
-    <div class="w-48 bg-stone-100 dark:bg-stone-900 h-screen p-6">
+    <div class="w-48 bg-stone-100 dark:bg-stone-900 h-min-screen p-6">
       <nav class="space-y-2">
         <SidebarItem v-for="item in items" :key="item.route" :item="item" @click="goToRoute(item.route)" />
         <div class="pt-4 mt-4 border-t border-stone-200 dark:border-stone-800">
