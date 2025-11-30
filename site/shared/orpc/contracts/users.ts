@@ -9,7 +9,7 @@ const userSchema = z.object({
 	id: z.number(),
 	email: z.email(),
 	name: z.string().nullable(),
-	avatarUrl: z.string().url().nullable(),
+	avatarUrl: z.url().nullable(),
 	bio: z.string().nullable(),
 	createdAt: z.string(), // ISO8601形式の日時文字列（JSON シリアライズ対応）
 	updatedAt: z.string(),

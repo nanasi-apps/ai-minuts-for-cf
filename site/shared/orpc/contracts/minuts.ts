@@ -2,6 +2,10 @@ import { oc } from "@orpc/contract";
 import * as z from "zod";
 
 const generatePresignedUrl = oc
+	.route({
+		path: "/generate-presigned-url",
+		method: "POST",
+	})
 	.input(
 		z.object({
 			filename: z.string().min(1),
@@ -18,9 +22,9 @@ const generatePresignedUrl = oc
 	)
 	.output(
 		z.object({
-			uploadUrl: z.string().url(),
+			uploadUrl: z.url(),
 			key: z.string(),
-			audioUploadUrl: z.string().url().optional(),
+			audioUploadUrl: z.url().optional(),
 			audioKey: z.string().optional(),
 			minutsId: z.number(),
 		}),
@@ -56,7 +60,7 @@ const process = oc
 
 const get = oc
 	.route({
-		path: "/:id",
+		path: "/:minutsId",
 		method: "GET",
 	})
 	.input(
@@ -96,7 +100,7 @@ const regenerateSummary = oc
 
 const remove = oc
 	.route({
-		path: "/:id",
+		path: "/:minutsId",
 		method: "DELETE",
 	})
 	.input(
@@ -110,11 +114,32 @@ const remove = oc
 		}),
 	);
 
+const update = oc
+	.route({
+		path: "/:minutsId",
+		method: "PATCH",
+	})
+	.input(
+		z.object({
+			minutsId: z.coerce.number().int().positive(),
+			title: z.string().min(1),
+		}),
+	)
+	.output(
+		z.object({
+			minuts: z.object({
+				id: z.number(),
+				title: z.string(),
+			}),
+		}),
+	);
+
 export const minuts = oc.prefix("/minuts").router({
 	generatePresignedUrl,
 	list,
 	process,
 	get,
 	regenerateSummary,
+	update,
 	delete: remove,
 });

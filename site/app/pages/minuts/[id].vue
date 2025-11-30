@@ -79,6 +79,40 @@ const onConfirmDelete = async () => {
 		addToast("削除に失敗しました", "error");
 	}
 };
+
+const isEditingTitle = ref(false);
+const editingTitle = ref("");
+const titleInput = ref<HTMLInputElement | null>(null);
+
+const startEditingTitle = async () => {
+	editingTitle.value = minuts.value?.title || "";
+	isEditingTitle.value = true;
+	await nextTick();
+	titleInput.value?.focus();
+};
+
+const saveTitle = async () => {
+	if (!editingTitle.value || !minuts.value) return;
+
+	try {
+		const result = await api.minuts.update({
+			minutsId,
+			title: editingTitle.value,
+		});
+
+		// Update local state
+		minuts.value.title = result.minuts.title;
+		isEditingTitle.value = false;
+		addToast("タイトルを更新しました", "success");
+	} catch (e) {
+		console.error(e);
+		addToast("タイトルの更新に失敗しました", "error");
+	}
+};
+
+const cancelEditingTitle = () => {
+	isEditingTitle.value = false;
+};
 </script>
 
 <template>
@@ -87,7 +121,34 @@ const onConfirmDelete = async () => {
     <div v-else-if="minuts" class="detail-content">
         <div class="detail-header">
             <div class="detail-title">
-                <h1 class="detail-heading">{{ minuts.title }}</h1>
+                <div v-if="!isEditingTitle" class="group flex items-center gap-2">
+                    <h1 class="detail-heading">{{ minuts.title }}</h1>
+                    <button 
+                        @click="startEditingTitle" 
+                        class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        title="タイトルを編集"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                </div>
+                <div v-else class="flex items-center gap-2 w-full max-w-2xl">
+                    <input 
+                        v-model="editingTitle" 
+                        @keydown.enter="saveTitle"
+                        @keydown.esc="cancelEditingTitle"
+                        ref="titleInput"
+                        type="text"
+                        class="detail-heading bg-transparent border-b-2 border-primary-500 focus:outline-none w-full px-1 py-0.5"
+                    />
+                    <div class="flex shrink-0">
+                        <button @click="saveTitle" class="p-1.5 text-green-600 hover:bg-green-50 rounded-md dark:text-green-400 dark:hover:bg-green-900/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        </button>
+                        <button @click="cancelEditingTitle" class="p-1.5 text-red-600 hover:bg-red-50 rounded-md dark:text-red-400 dark:hover:bg-red-900/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
                 <div class="detail-meta">
                     <span>{{ formatDate(minuts.createdAt) }}</span>
                     <StatusBadge :status="minuts.status" />

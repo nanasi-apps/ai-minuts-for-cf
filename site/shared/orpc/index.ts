@@ -1,5 +1,5 @@
 import { oc } from "@orpc/contract";
-import auth from "#/orpc/contracts/auth";
+import { auth } from "#/orpc/contracts/auth";
 import { minuts } from "#/orpc/contracts/minuts";
 import { organizations } from "#/orpc/contracts/organizations";
 import users from "#/orpc/contracts/users";

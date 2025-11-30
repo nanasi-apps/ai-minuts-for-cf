@@ -1,24 +1,26 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
 
-export const auth = oc.router({
-	me: oc.output(
-		z.object({
-			user: z
-				.object({
-					id: z.number(),
-					email: z.string().email(),
-					name: z.string(),
-					picture: z.string().optional(),
-				})
-				.nullable(),
-		}),
-	),
-	logout: oc.output(
-		z.object({
-			success: z.boolean(),
-		}),
-	),
-});
+const me = oc.route({ path: "/me", method: "GET" }).output(
+	z.object({
+		user: z
+			.object({
+				id: z.number(),
+				email: z.email(),
+				name: z.string(),
+				picture: z.string().optional(),
+			})
+			.nullable(),
+	}),
+);
 
-export default auth;
+const logout = oc.route({ path: "/logout", method: "POST" }).output(
+	z.object({
+		success: z.boolean(),
+	}),
+);
+
+export const auth = oc.prefix("/auth").router({
+	me,
+	logout,
+});

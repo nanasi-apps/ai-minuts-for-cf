@@ -268,4 +268,37 @@ export default {
 				success: true,
 			};
 		}),
+
+	update: os.minuts.update
+		.use(authMiddleware)
+		.handler(async ({ context, input }) => {
+			const minuts = await context.db.minuts.findUnique({
+				where: {
+					id: input.minutsId,
+					userId: context.userId,
+				},
+			});
+
+			if (!minuts) {
+				throw new ORPCError("NOT_FOUND", {
+					message: "議事録が見つかりません",
+				});
+			}
+
+			const updatedMinuts = await context.db.minuts.update({
+				where: {
+					id: input.minutsId,
+				},
+				data: {
+					title: input.title,
+				},
+			});
+
+			return {
+				minuts: {
+					id: updatedMinuts.id,
+					title: updatedMinuts.title,
+				},
+			};
+		}),
 };
