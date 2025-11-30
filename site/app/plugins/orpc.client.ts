@@ -1,26 +1,21 @@
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import type { ContractRouterClient } from "@orpc/contract";
-import type { contract } from "#/orpc";
+import { RequestValidationPlugin } from "@orpc/contract/plugins";
+import { contract } from "#/orpc";
 
-export default defineNuxtPlugin((_nuxtApp) => {
-	const requestURL = useRequestURL();
-
-	// SSRとクライアントで適切なURLを構築
-	const baseURL = import.meta.server
-		? `${requestURL.protocol}//${requestURL.host}`
-		: window.location.origin;
+export default defineNuxtPlugin(async () => {
+	const baseURL = window.location.origin;
 
 	const rpcLink = new RPCLink({
 		url: new URL("/rpc", baseURL),
+		plugins: [new RequestValidationPlugin(contract)],
 		headers: () => {
 			let token: string | null = null;
-			if (import.meta.client) {
-				try {
-					token = localStorage.getItem("session_token");
-				} catch (error) {
-					console.warn("Failed to access localStorage:", error);
-				}
+			try {
+				token = localStorage.getItem("session_token");
+			} catch (error) {
+				console.warn("Failed to access localStorage:", error);
 			}
 			return token ? { Authorization: `Bearer ${token}` } : {};
 		},

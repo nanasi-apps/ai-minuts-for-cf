@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { InferContractRouterOutputs } from "@orpc/contract";
+import type { contract } from "#/orpc";
 import Button from "@/app/components/general/Button.vue";
 import PageContainer from "@/app/components/layout/PageContainer.vue";
 import MinutsDetailSkeleton from "@/app/components/minuts/MinutsDetailSkeleton.vue";
@@ -19,22 +21,17 @@ const route = useRoute();
 const minutsId = Number(route.params.id);
 
 const api = useApi();
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const { formatDate } = useDateFormat();
 const { addToast } = useToast();
 
-const {
-	// biome-ignore lint/correctness/noUnusedVariables: used in the template
-	data: minuts,
-	// biome-ignore lint/correctness/noUnusedVariables: used in the template
-	status,
-	refresh,
-} = useAsyncApi(() => api.minuts.get({ id: minutsId }), {
-	key: `api:minuts:${minutsId}`,
-	server: false,
-});
+export type Outputs = InferContractRouterOutputs<typeof contract>;
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
+type Minuts = Outputs["minuts"]["get"];
+
+const { data: minuts, status } = await useAsyncApi<Minuts>(() =>
+	api.minuts.get({ minutsId }),
+);
+
 const processMinuts = async () => {
 	try {
 		await api.minuts.process({ minutsId });
@@ -45,14 +42,12 @@ const processMinuts = async () => {
 	}
 };
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const regenerateSummary = async () => {
 	console.log("regenerateSummary clicked");
 	try {
 		console.log("Calling api.minuts.regenerateSummary...");
 		await api.minuts.regenerateSummary({ minutsId });
 		console.log("API call success");
-		refresh();
 		addToast("再要約を開始しました", "success");
 	} catch (e) {
 		console.error("API call failed", e);
@@ -63,18 +58,18 @@ const regenerateSummary = async () => {
 const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
 
 const handleDelete = () => {
-  confirmDialog.value?.open();
+	confirmDialog.value?.open();
 };
 
 const onConfirmDelete = async () => {
-  try {
-    await api.minuts.delete({ id: minutsId });
-    addToast("削除しました", "success");
-    navigateTo("/dashboard");
-  } catch (e) {
-    console.error(e);
-    addToast("削除に失敗しました", "error");
-  }
+	try {
+		await api.minuts.delete({ id: minutsId });
+		addToast("削除しました", "success");
+		navigateTo("/dashboard");
+	} catch (e) {
+		console.error(e);
+		addToast("削除に失敗しました", "error");
+	}
 };
 </script>
 

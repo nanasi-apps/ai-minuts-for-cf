@@ -1,27 +1,22 @@
 <script setup lang="ts">
 import { useStore } from "@tanstack/vue-store";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
+
 import Button from "@/app/components/general/Button.vue";
 import { authStore, logout } from "@/app/stores/auth";
 
 const router = useRouter();
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const user = useStore(authStore, (state) => state.user);
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const isLoading = useStore(authStore, (state) => state.isLoading);
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const goToLogin = () => {
 	router.push("/login");
 };
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const goToDashboard = () => {
 	router.push("/dashboard");
 };
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const handleLogout = () => {
 	logout();
 	window.location.href = "/login";

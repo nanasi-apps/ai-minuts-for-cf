@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useStore } from "@tanstack/vue-store";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Button from "@/app/components/general/Button.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import AuthShell from "@/app/components/layout/AuthShell.vue";
 import { authStore } from "@/app/stores/auth";
 
@@ -15,7 +13,6 @@ watchEffect(() => {
 	}
 });
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const handleGoogleLogin = () => {
 	// Navigate to Google login route
 	window.location.href = "/auth/google/login";

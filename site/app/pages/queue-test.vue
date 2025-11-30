@@ -28,7 +28,6 @@ const result = ref<unknown>(null);
 const steps = ref<string[]>([]);
 const api = useApi();
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const handleFileChange = (e: Event) => {
 	const target = e.target as HTMLInputElement;
 	if (target.files && target.files.length > 0) {
@@ -39,7 +38,6 @@ const handleFileChange = (e: Event) => {
 	}
 };
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const upload = async () => {
 	if (!file.value) return;
 

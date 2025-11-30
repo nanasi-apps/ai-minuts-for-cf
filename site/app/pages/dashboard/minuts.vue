@@ -1,15 +1,12 @@
 <script setup lang="ts">
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import FileInput from "@/app/components/dashboard/FileInput.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
-import PageContainer from "@/app/components/layout/PageContainer.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
-import SectionHeader from "@/app/components/layout/SectionHeader.vue";
 import { useApi } from "@/app/composable/useApi";
 import { useToast } from "@/app/composables/useToast";
 
 definePageMeta({
-	title: "minuts",
+	title: "pages.minuts.title",
+	description: "pages.minuts.description",
+	pageSize: "narrow",
 	layout: "dashboard",
 	middleware: ["auth"],
 });
@@ -21,7 +18,6 @@ const isUploading = ref(false);
 const uploadProgress = ref(0);
 const errorMessage = ref<string | null>(null);
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const handleFileSelect = async (file: File) => {
 	if (isUploading.value) return;
 
@@ -95,12 +91,7 @@ const uploadToR2 = (url: string, file: File): Promise<void> => {
 </script>
 
 <template>
-  <PageContainer size="narrow">
-    <SectionHeader
-      title="動画・音声をアップロード"
-      description="AIが自動で議事録を作成します。MP4またはMP3ファイルに対応しています。"
-    />
-
+  <div>
     <div v-if="errorMessage" class="upload-alert">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="alert-icon">
         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
@@ -138,7 +129,7 @@ const uploadToR2 = (url: string, file: File): Promise<void> => {
     </div>
 
     <FileInput v-else @select="handleFileSelect" />
-  </PageContainer>
+  </div>
 </template>
 
 <style scoped>

@@ -11,7 +11,7 @@ class_name = "QueueDO"
 # Durable Object migration
 [[migrations]]
 tag = "v1"
-new_classes = ["QueueDO"]
+new_sqlite_classes = ["QueueDO"]
 
 # KV Namespace binding (Placeholder)
 # D1 Database binding

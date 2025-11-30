@@ -1,4 +1,4 @@
-name = "example"
+name = "ai-minuts"
 
 main = "./.output/server/index.mjs"
 

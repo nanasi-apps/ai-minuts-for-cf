@@ -13,7 +13,6 @@ const props = withDefaults(
 	},
 );
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const variantClass = computed(() => {
 	return props.variant === "error"
 		? "state-panel--error"

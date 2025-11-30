@@ -1,17 +1,16 @@
 <script setup lang="ts">
 interface Props {
-	title: string;
+	title?: string;
 	description?: string;
 }
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const props = defineProps<Props>();
 </script>
 
 <template>
   <div class="section-header">
     <div class="section-text">
-      <h1 class="section-title">{{ props.title }}</h1>
+      <h1 v-if="props.title" class="section-title">{{ props.title }}</h1>
       <p v-if="props.description" class="section-description">{{ props.description }}</p>
     </div>
     <div class="section-actions">

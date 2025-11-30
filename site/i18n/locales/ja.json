@@ -82,5 +82,19 @@
 		"overview": "概要",
 		"settings": "設定"
 	},
-	"minuts": "議事録"
+	"minuts": "議事録",
+	"pages": {
+		"dashboard": {
+			"title": "概要",
+			"description": "議事録の管理と閲覧ができます"
+		},
+		"minuts": {
+			"title": "動画・音声をアップロード",
+			"description": "AIが自動で議事録を作成します。MP4またはMP3ファイルに対応しています。"
+		},
+		"settings": {
+			"title": "設定",
+			"description": "アプリケーションの設定を管理します"
+		}
+	}
 }

@@ -4,12 +4,10 @@ const isDragging = ref(false);
 
 const emit = defineEmits<(e: "select", file: File) => void>();
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const openFileDialog = () => {
 	fileInput.value?.click();
 };
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const handleFileChange = (event: Event) => {
 	const target = event.target as HTMLInputElement;
 	if (target.files && target.files.length > 0) {
@@ -22,7 +20,6 @@ const handleFileChange = (event: Event) => {
 	}
 };
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const onDrop = (event: DragEvent) => {
 	isDragging.value = false;
 	if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {

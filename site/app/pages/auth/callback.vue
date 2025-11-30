@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import AuthShell from "@/app/components/layout/AuthShell.vue";
 
 onMounted(async () => {

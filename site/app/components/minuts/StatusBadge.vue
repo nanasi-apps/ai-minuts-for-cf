@@ -5,7 +5,6 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const statusConfig = computed(() => {
 	switch (props.status) {
 		case "COMPLETED":

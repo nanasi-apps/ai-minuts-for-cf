@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const props = defineProps<{
 	item: {
 		name: string;

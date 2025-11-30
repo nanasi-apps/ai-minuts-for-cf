@@ -77,5 +77,19 @@
 		"overview": "Overview",
 		"meetings": "Meetings",
 		"settings": "Settings"
+	},
+	"pages": {
+		"dashboard": {
+			"title": "Overview",
+			"description": "Manage and view your meeting minutes"
+		},
+		"minuts": {
+			"title": "Upload Video or Audio",
+			"description": "AI will automatically create meeting minutes. Support for MP4 or MP3 files."
+		},
+		"settings": {
+			"title": "Settings",
+			"description": "Manage application settings"
+		}
 	}
 }

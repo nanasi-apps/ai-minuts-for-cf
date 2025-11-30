@@ -1,4 +1,4 @@
-import { RPCHandler } from "@orpc/server/node";
+import { RPCHandler } from "@orpc/server/fetch";
 import { router } from "@/server/orpc";
 import { createPrismaClient } from "@/server/prisma-client";
 
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 	// 認証ヘッダーを取得してコンテキストに含める
 	const authHeader = getHeader(event, "authorization");
 
-	const { matched } = await handler.handle(event.node.req, event.node.res, {
+	const { matched, response } = await handler.handle(toWebRequest(event), {
 		prefix: "/rpc",
 		context: {
 			db: prisma,
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
 	});
 
 	if (matched) {
-		return;
+		return response;
 	}
 
 	setResponseStatus(event, 404, "Not Found");

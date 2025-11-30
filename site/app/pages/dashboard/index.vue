@@ -1,17 +1,9 @@
 <script setup lang="ts">
 import type { InferContractRouterOutputs } from "@orpc/contract";
 import type { contract } from "#/orpc";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Button from "@/app/components/general/Button.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import StatePanel from "@/app/components/general/StatePanel.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
-import PageContainer from "@/app/components/layout/PageContainer.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
-import SectionHeader from "@/app/components/layout/SectionHeader.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import MinutsCard from "@/app/components/minuts/MinutsCard.vue";
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import MinutsSkeletonGrid from "@/app/components/minuts/MinutsSkeletonGrid.vue";
 import ConfirmDialog from "@/app/components/ui/ConfirmDialog.vue";
 import { useApi, useAsyncApi } from "@/app/composable/useApi";
@@ -21,6 +13,8 @@ export type Outputs = InferContractRouterOutputs<typeof contract>;
 type MinutsList = Outputs["minuts"]["list"];
 
 definePageMeta({
+	title: "pages.dashboard.title",
+	description: "pages.dashboard.description",
 	layout: "dashboard",
 	middleware: ["auth"],
 });
@@ -29,54 +23,45 @@ const api = useApi();
 
 const {
 	data: minutsList,
-	// biome-ignore lint/correctness/noUnusedVariables: used in the template
 	status,
-	// biome-ignore lint/correctness/noUnusedVariables: used in the template
 	refresh,
 } = useAsyncApi<MinutsList>((api) => api.minuts.list(), {
 	key: "api:minuts:list",
-	server: false,
 	dedupe: "defer",
 });
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const minutsLists = computed(() => minutsList.value ?? []);
 
 const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
 const deletingId = ref<number | null>(null);
 
 const onDeleteClick = (id: number) => {
-  deletingId.value = id;
-  confirmDialog.value?.open();
+	deletingId.value = id;
+	confirmDialog.value?.open();
 };
 
 const onConfirmDelete = async () => {
-  if (deletingId.value === null) return;
-  
-  try {
-    await api.minuts.delete({ id: deletingId.value });
-    refresh();
-  } catch (e) {
-    console.error(e);
-  } finally {
-    deletingId.value = null;
-  }
+	if (deletingId.value === null) return;
+
+	try {
+		await api.minuts.delete({ id: deletingId.value });
+		refresh();
+	} catch (e) {
+		console.error(e);
+	} finally {
+		deletingId.value = null;
+	}
 };
 </script>
 
 <template>
-  <PageContainer>
-    <SectionHeader
-      :title="$t('dashboard.overview')"
-      description="議事録の管理と閲覧ができます"
-    >
-      <template #actions>
-        <NuxtLink to="/dashboard/minuts" class="create-button">
-          <span class="create-button__icon">+</span>
-          新規作成
-        </NuxtLink>
-      </template>
-    </SectionHeader>
+  <div>
+    <div class="header-actions">
+      <NuxtLink to="/dashboard/minuts" class="create-button">
+        <span class="create-button__icon">+</span>
+        新規作成
+      </NuxtLink>
+    </div>
 
     <MinutsSkeletonGrid v-if="status === 'pending'" />
 
@@ -124,11 +109,15 @@ const onConfirmDelete = async () => {
       type="danger"
       @confirm="onConfirmDelete"
     />
-  </PageContainer>
+  </div>
 </template>
 
 <style scoped>
 @reference "@/app/assets/index.css";
+
+.header-actions {
+  @apply mb-6 flex justify-start;
+}
 
 .create-button {
   @apply bg-mattya-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all flex items-center gap-2;

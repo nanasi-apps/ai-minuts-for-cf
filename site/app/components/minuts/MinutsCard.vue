@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import StatusBadge from "@/app/components/minuts/StatusBadge.vue";
 import { useDateFormat } from "@/app/composables/useDateFormat";
 
@@ -16,13 +15,8 @@ interface Props {
 
 defineProps<Props>();
 
+const emit = defineEmits<(e: "delete", id: number) => void>();
 
-
-const emit = defineEmits<{
-  (e: 'delete', id: number): void;
-}>();
-
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const { formatDate } = useDateFormat();
 </script>
 

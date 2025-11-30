@@ -1,8 +1,6 @@
 <script setup lang="ts">
-// biome-ignore lint/correctness/noUnusedImports: used in the template
 import Toast from "./Toast.vue";
 
-// biome-ignore lint/correctness/noUnusedVariables: used in the template
 const { toasts, removeToast } = useToast();
 </script>
 

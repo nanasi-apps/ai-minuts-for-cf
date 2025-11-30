@@ -1,5 +1,5 @@
 import { oc } from "@orpc/contract";
-import { z } from "zod";
+import * as z from "zod";
 
 const generatePresignedUrl = oc
 	.input(
@@ -35,7 +35,7 @@ const process = oc
 	})
 	.input(
 		z.object({
-			minutsId: z.number(),
+			minutsId: z.coerce.number().int().positive(),
 		}),
 	)
 	.output(
@@ -52,7 +52,7 @@ const get = oc
 	})
 	.input(
 		z.object({
-			id: z.number(),
+			minutsId: z.coerce.number().int().positive(),
 		}),
 	)
 	.output(
@@ -73,7 +73,7 @@ const regenerateSummary = oc
 	})
 	.input(
 		z.object({
-			minutsId: z.number(),
+			minutsId: z.coerce.number().int().positive(),
 		}),
 	)
 	.output(
@@ -90,7 +90,7 @@ const remove = oc
 	})
 	.input(
 		z.object({
-			id: z.number(),
+			minutsId: z.coerce.number().int().positive(),
 		}),
 	)
 	.output(

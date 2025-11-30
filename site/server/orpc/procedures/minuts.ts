@@ -117,7 +117,7 @@ export default {
 	get: os.minuts.get.use(authMiddleware).handler(async ({ context, input }) => {
 		const minuts = await context.db.minuts.findUnique({
 			where: {
-				id: input.id,
+				id: input.minutsId,
 				userId: context.userId,
 			},
 		});
@@ -197,28 +197,30 @@ export default {
 			};
 		}),
 
-	delete: os.minuts.delete.use(authMiddleware).handler(async ({ context, input }) => {
-		const minuts = await context.db.minuts.findUnique({
-			where: {
-				id: input.id,
-				userId: context.userId,
-			},
-		});
-
-		if (!minuts) {
-			throw new ORPCError("NOT_FOUND", {
-				message: "議事録が見つかりません",
+	delete: os.minuts.delete
+		.use(authMiddleware)
+		.handler(async ({ context, input }) => {
+			const minuts = await context.db.minuts.findUnique({
+				where: {
+					id: input.minutsId,
+					userId: context.userId,
+				},
 			});
-		}
 
-		await context.db.minuts.delete({
-			where: {
-				id: input.id,
-			},
-		});
+			if (!minuts) {
+				throw new ORPCError("NOT_FOUND", {
+					message: "議事録が見つかりません",
+				});
+			}
 
-		return {
-			success: true,
-		};
-	}),
+			await context.db.minuts.delete({
+				where: {
+					id: input.minutsId,
+				},
+			});
+
+			return {
+				success: true,
+			};
+		}),
 };

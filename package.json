@@ -11,6 +11,7 @@
 		"typecheck": "pnpm -r typecheck",
 		"lint-format": "biome check",
 		"lint-format:fix": "biome check --write",
+		"deploy": "pnpm run -r deploy",
 		"prepare": "husky"
 	},
 	"dependencies": {

@@ -59,11 +59,16 @@ export default defineNuxtConfig({
 			},
 		},
 		plugins: [tailwindcss()],
+		assetsInclude: ["**/*.wasm"],
 		build: {
 			sourcemap: false,
 		},
 	},
 	experimental: {
 		viewTransition: true,
+	},
+	routeRules: {
+		"/dashboard/**": { ssr: false },
+		"/minuts/**": { ssr: false },
 	},
 });

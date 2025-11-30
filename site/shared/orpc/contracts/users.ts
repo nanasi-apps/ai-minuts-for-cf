@@ -48,7 +48,7 @@ const getUser = oc
 	})
 	.input(
 		z.object({
-			id: z.number(),
+			id: z.coerce.number(),
 		}),
 	)
 	.output(userSchema);
