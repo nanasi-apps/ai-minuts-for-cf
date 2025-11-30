@@ -1,13 +1,36 @@
 <script setup lang="ts">
+import { computed, onUnmounted, ref } from "vue"; // Added ref import
+
 const props = defineProps<{
 	src: string;
 	subtitle?: string | null;
 }>();
 
+const emit = defineEmits<(e: "timeupdate", time: number) => void>();
+
+const videoRef = ref<HTMLVideoElement | null>(null);
+
 const subtitleUrl = computed(() => {
 	if (!props.subtitle) return null;
 	const blob = new Blob([props.subtitle], { type: "text/vtt" });
 	return URL.createObjectURL(blob);
+});
+
+const seekTo = (time: number) => {
+	if (videoRef.value) {
+		videoRef.value.currentTime = time;
+		videoRef.value.play();
+	}
+};
+
+const handleTimeUpdate = () => {
+	if (videoRef.value) {
+		emit("timeupdate", videoRef.value.currentTime);
+	}
+};
+
+defineExpose({
+	seekTo,
 });
 
 // Cleanup URL on unmount
@@ -21,11 +44,13 @@ onUnmounted(() => {
 <template>
   <div class="media-player-container">
     <video
+      ref="videoRef"
       :src="src"
       controls
       class="media-player"
       playsinline
       crossorigin="anonymous"
+      @timeupdate="handleTimeUpdate"
     >
       <track
         v-if="subtitleUrl"

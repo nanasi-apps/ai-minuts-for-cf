@@ -54,6 +54,17 @@ const regenerateSummary = async () => {
 
 const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
 
+const mediaPlayer = ref<InstanceType<typeof MediaPlayer> | null>(null);
+const currentTime = ref(0);
+
+const handleSeek = (time: number) => {
+	mediaPlayer.value?.seekTo(time);
+};
+
+const handleTimeUpdate = (time: number) => {
+	currentTime.value = time;
+};
+
 const handleDelete = () => {
 	confirmDialog.value?.open();
 };
@@ -108,19 +119,24 @@ const onConfirmDelete = async () => {
               :summary="minuts.summary"
               :is-processing="minuts.status === 'PROCESSING'"
               @regenerate="regenerateSummary"
+              @seek="handleSeek"
               class="summary-card"
           />
           
           <div class="content-right">
             <MediaPlayer
                 v-if="minuts.videoUrl"
+                ref="mediaPlayer"
                 :src="minuts.videoUrl"
                 :subtitle="minuts.subtitle"
+                @timeupdate="handleTimeUpdate"
                 class="media-player"
             />
             <TranscriptCard
                 v-if="minuts.transcript"
                 :transcript="minuts.transcript"
+                :current-time="currentTime"
+                @seek="handleSeek"
                 class="transcript-card"
             />
           </div>
