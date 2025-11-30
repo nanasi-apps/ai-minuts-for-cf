@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MinutesLanguage } from "#/orpc/contracts/users";
 import Button from "@/app/components/general/Button.vue";
 import StatePanel from "@/app/components/general/StatePanel.vue";
 import { useApi, useAsyncApi } from "@/app/composable/useApi";
@@ -11,8 +12,6 @@ definePageMeta({
 });
 
 const api = useApi();
-
-type MinutesLanguage = "ja" | "en";
 
 const languageOptions: { value: MinutesLanguage; label: string }[] = [
 	{ value: "ja", label: "日本語" },

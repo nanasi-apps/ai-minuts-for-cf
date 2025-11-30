@@ -32,6 +32,10 @@ const userSettingsSchema = z.object({
 	minutesLanguage: z.enum(["ja", "en"]),
 });
 
+export type MinutesLanguage = z.infer<
+	typeof userSettingsSchema
+>["minutesLanguage"];
+
 /**
  * ユーザー取得エンドポイント
  * 認証済みユーザーの情報を取得する

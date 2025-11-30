@@ -4,10 +4,11 @@
  * Date型のシリアライズやnull値の処理を統一的に行う
  */
 
+import type { MinutesLanguage } from "#/orpc/contracts/users";
+
 /**
  * DBから取得したユーザーエンティティの型
  */
-export type MinutesLanguage = "ja" | "en";
 
 export interface UserEntity {
 	id: number;
