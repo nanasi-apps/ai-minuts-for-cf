@@ -13,6 +13,8 @@ export interface UserEntity {
 	name: string | null;
 	avatarUrl: string | null;
 	bio: string | null;
+	summaryPreference: string;
+	minutesLanguage: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -27,6 +29,8 @@ export interface PackedUser {
 	name: string | null;
 	avatarUrl: string | null;
 	bio: string | null;
+	summaryPreference: string;
+	minutesLanguage: string;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -48,6 +52,8 @@ export class UserPackingService {
 			name: user.name,
 			avatarUrl: user.avatarUrl,
 			bio: user.bio,
+			summaryPreference: user.summaryPreference,
+			minutesLanguage: user.minutesLanguage,
 			createdAt: user.createdAt.toISOString(),
 			updatedAt: user.updatedAt.toISOString(),
 		};

@@ -11,6 +11,8 @@ const userSchema = z.object({
 	name: z.string().nullable(),
 	avatarUrl: z.url().nullable(),
 	bio: z.string().nullable(),
+	summaryPreference: z.string(),
+	minutesLanguage: z.enum(["ja", "en"]),
 	createdAt: z.string(), // ISO8601形式の日時文字列（JSON シリアライズ対応）
 	updatedAt: z.string(),
 });
@@ -23,6 +25,11 @@ const updateProfileInputSchema = z.object({
 	name: z.string().min(1).max(100).optional(),
 	avatarUrl: z.url().optional(),
 	bio: z.string().max(500).optional(),
+});
+
+const userSettingsSchema = z.object({
+	summaryPreference: z.string().trim().max(120),
+	minutesLanguage: z.enum(["ja", "en"]),
 });
 
 /**
@@ -66,6 +73,21 @@ const updateProfile = oc
 	.input(updateProfileInputSchema)
 	.output(userSchema);
 
+const getSettings = oc
+	.route({
+		path: "/me/settings",
+		method: "GET",
+	})
+	.output(userSettingsSchema);
+
+const updateSettings = oc
+	.route({
+		path: "/me/settings",
+		method: "PATCH",
+	})
+	.input(userSettingsSchema)
+	.output(userSettingsSchema);
+
 /**
  * users コントラクトルーター
  * /users プレフィックス配下にエンドポイントを配置
@@ -74,9 +96,12 @@ export default oc.prefix("/users").router({
 	getMe,
 	getUser,
 	updateProfile,
+	getSettings,
+	updateSettings,
 });
 
 /**
  * スキーマの再エクスポート（サーバー実装で型として使用）
  */
 export { userSchema, updateProfileInputSchema };
+export { userSettingsSchema };

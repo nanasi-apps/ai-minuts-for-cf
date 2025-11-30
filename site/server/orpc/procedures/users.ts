@@ -94,4 +94,50 @@ export default {
 
 			return userPackingService.pack(updatedUser);
 		}),
+
+	/**
+	 * 認証済みユーザーの設定を取得
+	 */
+	getSettings: os.users.getSettings
+		.use(authMiddleware)
+		.handler(async ({ context }) => {
+			const userId = context.userId;
+
+			const user = await context.db.user.findUnique({
+				where: { id: userId },
+			});
+
+			if (!user) {
+				throw new ORPCError("NOT_FOUND", {
+					message: "ユーザーが見つかりません",
+				});
+			}
+
+			return {
+				summaryPreference: user.summaryPreference,
+				minutesLanguage: user.minutesLanguage,
+			};
+		}),
+
+	/**
+	 * 認証済みユーザーの設定を更新
+	 */
+	updateSettings: os.users.updateSettings
+		.use(authMiddleware)
+		.handler(async ({ input, context }) => {
+			const userId = context.userId;
+
+			const updatedUser = await context.db.user.update({
+				where: { id: userId },
+				data: {
+					summaryPreference: input.summaryPreference,
+					minutesLanguage: input.minutesLanguage,
+				},
+			});
+
+			return {
+				summaryPreference: updatedUser.summaryPreference,
+				minutesLanguage: updatedUser.minutesLanguage,
+			};
+		}),
 };
