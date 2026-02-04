@@ -1,5 +1,11 @@
 import type { Job } from "../utils/queueTypes";
-import { type MinutesLanguage, summarizeTranscript } from "./summarization";
+import {
+	detectMeetingType,
+	type MeetingType,
+	type MinutesLanguage,
+	normalizeMeetingType,
+	summarizeTranscript,
+} from "./summarization";
 import { transcribeAudio } from "./transcription";
 
 const SUMMARY_PREFERENCE_MAX_LENGTH = 120;
@@ -64,6 +70,20 @@ async function updateStatus(env: Env, minutsId: number, status: string) {
 		.run();
 }
 
+async function updateMeetingType(
+	env: Env,
+	minutsId: number,
+	meetingType: MeetingType,
+	source: "auto" | "manual",
+) {
+	await env.ai_minuts
+		.prepare(
+			"UPDATE Minuts SET meetingType = ?, meetingTypeSource = ? WHERE id = ?",
+		)
+		.bind(meetingType, source, minutsId)
+		.run();
+}
+
 async function completeMinuts(
 	env: Env,
 	minutsId: number,
@@ -124,8 +144,26 @@ export async function processMinutsJob(env: Env, job: Job): Promise<void> {
 		minuts.subtitle as string | null,
 	);
 
+	const storedMeetingType = normalizeMeetingType(minuts.meetingType);
+	const meetingTypeSource = minuts.meetingTypeSource as
+		| "auto"
+		| "manual"
+		| null;
+	let meetingType = storedMeetingType;
+
+	if (!meetingType) {
+		meetingType = await detectMeetingType(env.AI, transcript);
+	}
+
+	if (meetingTypeSource !== "manual") {
+		await updateMeetingType(env, job.payload.minutsId, meetingType, "auto");
+	}
+
 	console.log("[Processor] Starting summarization...");
-	const summary = await summarizeTranscript(env.AI, transcript, userSettings);
+	const summary = await summarizeTranscript(env.AI, transcript, {
+		...userSettings,
+		meetingType,
+	});
 	console.log("[Processor] Summarization complete.");
 
 	await completeMinuts(env, job.payload.minutsId, transcript, summary, vtt);

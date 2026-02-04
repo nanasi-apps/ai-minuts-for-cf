@@ -1,9 +1,11 @@
 type AiBinding = Env["AI"];
 export type MinutesLanguage = "ja" | "en";
+export type MeetingType = "study_session" | "regular" | "decision";
 
 type SummarizationOptions = {
 	minutesLanguage?: MinutesLanguage;
 	summaryPreference?: string;
+	meetingType?: MeetingType;
 };
 
 type QualityCheckResult = {
@@ -29,8 +31,99 @@ const LANGUAGE_OUTPUT_RULES: Record<
 	},
 };
 
-const buildSystemPrompt = (minutesLanguage: MinutesLanguage) => {
+const MEETING_TYPE_OUTPUT_FORMATS: Record<MeetingType, string> = {
+	study_session: `
+1. 概要（Summary）
+   * 50–180 characters.
+   * Concise main points only; **no timeline info**.
+
+2. 学習内容（Topics Covered）
+   * Bullet list of covered topics or learning goals.
+   * If none: 「なし」.
+
+3. 重要ポイント（Key Takeaways）
+   * Bullet list of explicit takeaways.
+   * If none: 「なし」.
+
+4. 質疑・ディスカッション（Q&A / Discussion）
+   * Include explicit questions, answers, or discussion points.
+   * If none: 「なし」.
+
+5. 次のアクション（Next Actions）
+   * Include tasks clearly verbalized as actions (e.g., 「〜を行います」「〜を進めます」「〜をお願いします」).
+   * No inferred tasks.
+   * If none: 「なし」.
+
+6. タイムライン（Timeline）
+   * Max 10 bullets; 1 bullet = 1 key event.
+   * Each bullet starts with the exact label \`[start - end]\` followed by a brief event.
+   * No quotes; never convert labels.
+`,
+	regular: `
+1. 概要（Summary）
+   * 50–180 characters.
+   * Concise main points only; **no timeline info**.
+
+2. 進捗（Progress Updates）
+   * Bullet list of explicit progress updates per topic.
+   * If none: 「なし」.
+
+3. 決定事項（Decisions）
+   * Only items explicitly marked as decisions/approvals/agreements.
+   * If none: 「なし」.
+
+4. 課題・懸念（Risks / Concerns）
+   * Include only explicit concerns. If none: 「なし」.
+
+5. 次のアクション（Next Actions）
+   * Include tasks clearly verbalized as actions (e.g., 「〜を行います」「〜を進めます」「〜をお願いします」).
+   * No inferred tasks.
+   * If none: 「なし」.
+
+6. タイムライン（Timeline）
+   * Max 10 bullets; 1 bullet = 1 key event.
+   * Each bullet starts with the exact label \`[start - end]\` followed by a brief event.
+   * No quotes; never convert labels.
+`,
+	decision: `
+1. 概要（Summary）
+   * 50–180 characters.
+   * Concise main points only; **no timeline info**.
+
+2. 目的・背景（Purpose / Context）
+   * Include only explicitly stated purpose or background.
+   * If none: 「なし」.
+
+3. 選択肢（Options Considered）
+   * List options explicitly mentioned.
+   * If none: 「なし」.
+
+4. 決定事項（Decisions）
+   * Only items explicitly marked as decisions/approvals/agreements.
+   * If none: 「なし」.
+
+5. 決定理由（Rationale）
+   * Include only explicitly stated reasons for decisions.
+   * If none: 「なし」.
+
+6. 次のアクション（Next Actions）
+   * Include tasks clearly verbalized as actions (e.g., 「〜を行います」「〜を進めます」「〜をお願いします」).
+   * No inferred tasks.
+   * If none: 「なし」.
+
+7. タイムライン（Timeline）
+   * Max 10 bullets; 1 bullet = 1 key event.
+   * Each bullet starts with the exact label \`[start - end]\` followed by a brief event.
+   * No quotes; never convert labels.
+`,
+};
+
+const buildSystemPrompt = (
+	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
+) => {
 	const languageRules = LANGUAGE_OUTPUT_RULES[minutesLanguage];
+	const outputFormat = MEETING_TYPE_OUTPUT_FORMATS[meetingType];
 
 	return `
 **System language: English (instructions only)**
@@ -68,41 +161,14 @@ Your job is to create structured minutes that satisfy every rule below.
 
 ---
 
+# MEETING TYPE
+
+* Meeting type: ${meetingType}
+
+---
+
 # OUTPUT FORMAT (use the target output language for section titles and content)
-
-1. 概要（Summary）
-   * 50–180 characters.
-   * Concise main points only; **no timeline info**.
-
-2. 決定事項（Decisions）
-   * Only items explicitly marked as decisions/approvals/agreements.
-   * If none: 「なし」.
-
-3. 次のアクション（Next Actions）
-   * Include tasks clearly verbalized as actions (e.g., 「〜を行います」「〜を進めます」「〜をお願いします」).
-   * No inferred tasks.
-   * If none: 「なし」.
-
-4. タイムライン（Timeline）
-   * Max 10 bullets; 1 bullet = 1 key event.
-   * Each bullet starts with the exact label \`[start - end]\` followed by a brief event.
-   * No quotes; never convert labels.
-
-5. 議題（Agenda）
-   * Include only if explicit agenda items exist (e.g., 「本日の議題は〜」). Otherwise omit.
-
-6. 議題別概要（Detailed Agenda）
-   * Appears **after Agenda** and **before Risks/Concerns** when Major Agenda items exist.
-   * For each Major Agenda item (policies/strategies/core matters, significant decisions, lengthy explanations, or Q&A topics):
-     - Provide a sub-summary of **150–300 characters**.
-     - Cover purpose, key explanation points, Q&A highlights (if any), and explicitly stated policy background/objectives.
-   * No inference or speculation. Non-major agenda items stay only in Agenda.
-
-7. リスク・懸念事項（Risks / Concerns）
-   * Include only explicit concerns. Otherwise omit.
-
-8. 要確認事項（Open Questions）
-   * Include unanswered questions only. If none: omit.
+${outputFormat}
 
 ---
 
@@ -121,6 +187,18 @@ const normalizeMinutesLanguage = (language: unknown): MinutesLanguage => {
 const normalizeSummaryPreference = (preference: unknown): string => {
 	if (typeof preference !== "string") return "";
 	return preference.trim().slice(0, SUMMARY_PREFERENCE_MAX_LENGTH);
+};
+
+export const normalizeMeetingType = (value: unknown): MeetingType | null => {
+	if (
+		value === "study_session" ||
+		value === "regular" ||
+		value === "decision"
+	) {
+		return value;
+	}
+
+	return null;
 };
 
 const extractAssistantContent = (llmResponse: unknown): string => {
@@ -198,9 +276,10 @@ const buildPreferencePrompt = (
 const buildSummarizationMessages = (
 	transcript: string,
 	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
 	summaryPreference: string,
 ) => [
-	{ role: "system", content: buildSystemPrompt(minutesLanguage) },
+	{ role: "system", content: buildSystemPrompt(minutesLanguage, meetingType) },
 	{
 		role: "user",
 		content: buildPreferencePrompt(summaryPreference, minutesLanguage),
@@ -219,6 +298,7 @@ Follow all instructions above and produce the minutes.`,
 const buildFeedbackAwareSummarizationMessages = (
 	transcript: string,
 	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
 	summaryPreference: string,
 	feedback: string,
 ) => {
@@ -226,6 +306,7 @@ const buildFeedbackAwareSummarizationMessages = (
 		return buildSummarizationMessages(
 			transcript,
 			minutesLanguage,
+			meetingType,
 			summaryPreference,
 		);
 	}
@@ -234,6 +315,7 @@ const buildFeedbackAwareSummarizationMessages = (
 		...buildSummarizationMessages(
 			transcript,
 			minutesLanguage,
+			meetingType,
 			summaryPreference,
 		),
 		{
@@ -243,10 +325,20 @@ const buildFeedbackAwareSummarizationMessages = (
 	];
 };
 
+const MEETING_TYPE_SECTION_CHECKS: Record<MeetingType, string> = {
+	study_session:
+		"Section headings appear in order for a study session: Summary, Topics Covered, Key Takeaways, Q&A / Discussion, Next Actions, Timeline. Use the target language for headings.",
+	regular:
+		"Section headings appear in order for a regular meeting: Summary, Progress Updates, Decisions, Risks/Concerns, Next Actions, Timeline. Use the target language for headings.",
+	decision:
+		"Section headings appear in order for a decision meeting: Summary, Purpose/Context, Options Considered, Decisions, Rationale, Next Actions, Timeline. Use the target language for headings.",
+};
+
 const buildQualityCheckMessages = (
 	transcript: string,
 	summary: string,
 	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
 ) => [
 	{
 		role: "system",
@@ -259,10 +351,9 @@ const buildQualityCheckMessages = (
 Checks:
 1) Output language must be ${minutesLanguage === "ja" ? "Japanese" : "English"} only.
 2) Summary length is 50–180 characters.
-3) Section headings appear in order: Summary, Decisions, Next Actions, Timeline, Agenda, Detailed Agenda (only if applicable and placed after Agenda), Risks/Concerns, Open Questions. When absent, use 「なし」 or omit according to the rules.
+3) ${MEETING_TYPE_SECTION_CHECKS[meetingType]}
 4) Timeline lines each start with a label like [0.00 - 1.00] and there are at most 10.
-5) Detailed Agenda appears after Agenda and before Risks/Concerns when present.
-6) No fabrication; the minutes must be concise and structured.
+5) No fabrication; the minutes must be concise and structured.
 ---
 Minutes:
 ${summary}
@@ -304,17 +395,62 @@ const checkMinutesQuality = async (
 	transcript: string,
 	summary: string,
 	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
 ): Promise<QualityCheckResult> => {
 	const llmResponse = await ai.run("@cf/openai/gpt-oss-20b", {
 		input: buildQualityCheckMessages(
 			transcript,
 			summary,
 			minutesLanguage,
+			meetingType,
 		) as ResponseInput,
 	});
 
 	const content = extractAssistantContent(llmResponse);
 	return parseQualityCheckResult(content);
+};
+
+const buildMeetingTypeDetectionMessages = (transcript: string) => [
+	{
+		role: "system",
+		content:
+			"You are a meeting type classifier. Respond only with minified JSON and no other text.",
+	},
+	{
+		role: "user",
+		content: `Classify the meeting transcript into one of: "study_session", "regular", "decision".
+Definitions:
+- study_session: learning-focused sessions, training, knowledge sharing, demos, workshops.
+- regular: recurring status meetings, weekly syncs, progress updates, routine check-ins.
+- decision: meetings centered on choosing between options, approvals, or final decisions.
+Return JSON: {"meetingType":"study_session|regular|decision"}.
+Transcript:
+${transcript}`,
+	},
+];
+
+const parseMeetingTypeResult = (raw: string): MeetingType | null => {
+	if (!raw) return null;
+
+	try {
+		const parsed = JSON.parse(raw) as { meetingType?: unknown };
+		return normalizeMeetingType(parsed.meetingType);
+	} catch (error) {
+		console.warn("[Summarization] Failed to parse meeting type JSON.", error);
+		return null;
+	}
+};
+
+export const detectMeetingType = async (
+	ai: AiBinding,
+	transcript: string,
+): Promise<MeetingType> => {
+	const llmResponse = await ai.run("@cf/openai/gpt-oss-20b", {
+		input: buildMeetingTypeDetectionMessages(transcript) as ResponseInput,
+	});
+
+	const content = extractAssistantContent(llmResponse);
+	return parseMeetingTypeResult(content) ?? "regular";
 };
 
 const MAX_SUMMARIZATION_ATTEMPTS = 2;
@@ -325,6 +461,8 @@ export async function summarizeTranscript(
 	options?: SummarizationOptions,
 ): Promise<string> {
 	const targetLanguage = normalizeMinutesLanguage(options?.minutesLanguage);
+	const targetMeetingType =
+		normalizeMeetingType(options?.meetingType) ?? "regular";
 	const summaryPreference = normalizeSummaryPreference(
 		options?.summaryPreference,
 	);
@@ -336,6 +474,7 @@ export async function summarizeTranscript(
 			ai,
 			transcript,
 			targetLanguage,
+			targetMeetingType,
 			summaryPreference,
 			feedback,
 		);
@@ -345,6 +484,7 @@ export async function summarizeTranscript(
 			transcript,
 			summary,
 			targetLanguage,
+			targetMeetingType,
 		);
 
 		if (quality.passed) {
@@ -367,6 +507,7 @@ const summarizeGPTOSS20B = async (
 	ai: AiBinding,
 	transcript: string,
 	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
 	summaryPreference: string,
 	feedback: string,
 ) => {
@@ -374,6 +515,7 @@ const summarizeGPTOSS20B = async (
 		input: buildFeedbackAwareSummarizationMessages(
 			transcript,
 			minutesLanguage,
+			meetingType,
 			summaryPreference,
 			feedback,
 		) as ResponseInput,
@@ -393,12 +535,14 @@ const _summarizeGPTOSS120B = async (
 	ai: AiBinding,
 	transcript: string,
 	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
 	summaryPreference: string,
 ) => {
 	const llmResponse = await ai.run("@cf/openai/gpt-oss-120b", {
 		input: buildSummarizationMessages(
 			transcript,
 			minutesLanguage,
+			meetingType,
 			summaryPreference,
 		) as ResponseInput,
 	});
@@ -418,12 +562,14 @@ const _summarizeGemma3_12B = async (
 	ai: AiBinding,
 	transcript: string,
 	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
 	summaryPreference: string,
 ) => {
 	const llmResponse = await ai.run("@cf/google/gemma-3-12b-it", {
 		messages: buildSummarizationMessages(
 			transcript,
 			minutesLanguage,
+			meetingType,
 			summaryPreference,
 		),
 	});
@@ -452,6 +598,7 @@ const _summarizeMistral24B = async (
 	ai: AiBinding,
 	transcript: string,
 	minutesLanguage: MinutesLanguage,
+	meetingType: MeetingType,
 	summaryPreference: string,
 ) => {
 	const llmResponse = await ai.run(
@@ -460,6 +607,7 @@ const _summarizeMistral24B = async (
 			messages: buildSummarizationMessages(
 				transcript,
 				minutesLanguage,
+				meetingType,
 				summaryPreference,
 			),
 		},

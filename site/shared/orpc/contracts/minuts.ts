@@ -1,6 +1,15 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
 
+const meetingTypeInput = z.enum([
+	"auto",
+	"study_session",
+	"regular",
+	"decision",
+]);
+
+export type MeetingTypeInput = z.infer<typeof meetingTypeInput>;
+
 const generatePresignedUrl = oc
 	.route({
 		path: "/generate-presigned-url",
@@ -11,6 +20,7 @@ const generatePresignedUrl = oc
 			filename: z.string().min(1),
 			contentType: z.enum(["video/mp4", "audio/mpeg", "audio/wav"]),
 			fileSize: z.number().int().positive(),
+			meetingType: meetingTypeInput.optional(),
 			audio: z
 				.object({
 					filename: z.string().min(1),
@@ -76,6 +86,8 @@ const get = oc
 			summary: z.string().nullable(),
 			transcript: z.string().nullable(),
 			subtitle: z.string().nullable(),
+			meetingType: meetingTypeInput.nullable(),
+			meetingTypeSource: z.enum(["auto", "manual"]),
 			videoUrl: z.string().nullable(),
 			createdAt: z.string(),
 		}),

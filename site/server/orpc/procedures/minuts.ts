@@ -42,11 +42,15 @@ export default {
 				}
 
 				// 議事録レコードを作成
+				const isManualMeetingType =
+					!!input.meetingType && input.meetingType !== "auto";
 				const minuts = await context.db.minuts.create({
 					data: {
 						title: input.filename, // とりあえずファイル名をタイトルにする
 						videoKey: key,
 						audioKey: audioKey,
+						meetingType: isManualMeetingType ? input.meetingType : null,
+						meetingTypeSource: isManualMeetingType ? "manual" : "auto",
 						userId: context.userId,
 						status: "UPLOADING",
 					},
@@ -178,6 +182,8 @@ export default {
 			summary: minuts.summary ?? null,
 			transcript: minuts.transcript ?? null,
 			subtitle: minuts.subtitle ?? null,
+			meetingType: minuts.meetingType ?? null,
+			meetingTypeSource: minuts.meetingTypeSource ?? "auto",
 			videoUrl,
 			createdAt: minuts.createdAt.toISOString(),
 		};

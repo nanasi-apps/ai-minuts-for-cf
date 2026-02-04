@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MeetingTypeInput } from "#/orpc/contracts/minuts";
 import FileInput from "@/app/components/dashboard/FileInput.vue";
 import { useApi } from "@/app/composable/useApi";
 import { useToast } from "@/app/composables/useToast";
@@ -20,6 +21,14 @@ const isUploading = ref(false);
 const uploadProgress = ref(0);
 const errorMessage = ref<string | null>(null);
 const statusMessage = ref("アップロード中...");
+const meetingType = ref<MeetingTypeInput>("auto");
+
+const meetingTypeOptions: { value: MeetingTypeInput; label: string }[] = [
+	{ value: "auto", label: "自動判定" },
+	{ value: "study_session", label: "勉強会" },
+	{ value: "regular", label: "定例" },
+	{ value: "decision", label: "意思決定" },
+];
 
 const handleFileSelect = async (file: File) => {
 	if (isUploading.value) return;
@@ -66,6 +75,7 @@ const handleFileSelect = async (file: File) => {
 				filename: file.name,
 				contentType: file.type as "video/mp4" | "audio/mpeg" | "audio/wav",
 				fileSize: file.size,
+				meetingType: meetingType.value,
 				audio:
 					audioBlob && audioFileName && audioContentType
 						? {
@@ -180,7 +190,25 @@ const uploadToR2 = (
       </div>
     </div>
 
-    <FileInput v-else @select="handleFileSelect" />
+    <div v-else class="upload-form">
+      <div class="meeting-type">
+        <label for="meetingType" class="meeting-type__label">会議タイプ</label>
+        <select
+          id="meetingType"
+          v-model="meetingType"
+          class="meeting-type__select"
+          name="meetingType"
+        >
+          <option v-for="option in meetingTypeOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        <p class="meeting-type__helper">
+          自動判定を選ぶと、内容から会議タイプを推定してテンプレートを調整します。
+        </p>
+      </div>
+      <FileInput @select="handleFileSelect" />
+    </div>
   </div>
 </template>
 
@@ -205,6 +233,26 @@ const uploadToR2 = (
   @media (prefers-color-scheme: dark) {
     @apply bg-stone-900 border-gray-800;
   }
+}
+
+.upload-form {
+  @apply flex flex-col gap-6;
+}
+
+.meeting-type {
+  @apply bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-5 flex flex-col gap-3;
+}
+
+.meeting-type__label {
+  @apply text-sm font-semibold text-stone-700 dark:text-stone-200;
+}
+
+.meeting-type__select {
+  @apply w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-4 py-3 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-mattya-400 focus:border-transparent;
+}
+
+.meeting-type__helper {
+  @apply text-xs text-stone-500 dark:text-stone-400;
 }
 
 .upload-content {

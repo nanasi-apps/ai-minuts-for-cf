@@ -123,6 +123,8 @@ model Minuts {
   videoKey  String
   audioKey  String?
   status    String   @default("UPLOADING") // UPLOADING, PROCESSING, COMPLETED, FAILED
+  meetingType String?
+  meetingTypeSource String @default("auto") // auto, manual
   summary   String?
   transcript String?
   subtitle   String?
