@@ -61,6 +61,7 @@ Your job is to create structured minutes that satisfy every rule below.
 3) **No fabrication**
    * Do not infer decisions, actions, agendas, risks, or concerns.
    * Only include statements explicitly present in the transcript.
+   * If classification is ambiguous or negated, omit the item and use 「なし」 where required.
 
 4) **Speaker neutrality**
    * Do not guess speakers.
@@ -76,10 +77,17 @@ Your job is to create structured minutes that satisfy every rule below.
 
 2. 決定事項（Decisions）
    * Only items explicitly marked as decisions/approvals/agreements.
+   * Accept explicit decision keywords/phrases such as:
+     - 「決定」「決まり」「決まった」「承認」「承認された」「合意」「合意した」
+     - 「了承」「可決」「採用」「確定」「締結」「合意に至った」
+   * Exclude proposals, suggestions, or discussions not finalized (e.g., 「〜案」「検討」「提案」「議論中」「方向性」).
    * If none: 「なし」.
 
 3. 次のアクション（Next Actions）
    * Include tasks clearly verbalized as actions (e.g., 「〜を行います」「〜を進めます」「〜をお願いします」).
+   * Also include explicit assignments or commitments:
+     - 「担当」「依頼」「宿題」「TODO」「〜までに」「期限」「〜することになった」
+   * Exclude vague intentions, hypotheticals, or non-commitments (e.g., 「〜したい」「〜できれば」「検討する」「可能性」).
    * No inferred tasks.
    * If none: 「なし」.
 
@@ -262,7 +270,8 @@ Checks:
 3) Section headings appear in order: Summary, Decisions, Next Actions, Timeline, Agenda, Detailed Agenda (only if applicable and placed after Agenda), Risks/Concerns, Open Questions. When absent, use 「なし」 or omit according to the rules.
 4) Timeline lines each start with a label like [0.00 - 1.00] and there are at most 10.
 5) Detailed Agenda appears after Agenda and before Risks/Concerns when present.
-6) No fabrication; the minutes must be concise and structured.
+6) Decisions/Next Actions include only explicit commitments or approvals; exclude proposals, wishes, or speculation.
+7) No fabrication; the minutes must be concise and structured.
 ---
 Minutes:
 ${summary}
