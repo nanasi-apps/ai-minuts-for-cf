@@ -76,12 +76,12 @@ Your job is to create structured minutes that satisfy every rule below.
 
 2. 決定事項（Decisions）
    * Only items explicitly marked as decisions/approvals/agreements.
-   * If none: 「なし」.
+   * If none: omit this section entirely.
 
 3. 次のアクション（Next Actions）
    * Include tasks clearly verbalized as actions (e.g., 「〜を行います」「〜を進めます」「〜をお願いします」).
    * No inferred tasks.
-   * If none: 「なし」.
+   * If none: omit this section entirely.
 
 4. タイムライン（Timeline）
    * Max 10 bullets; 1 bullet = 1 key event.
@@ -259,7 +259,7 @@ const buildQualityCheckMessages = (
 Checks:
 1) Output language must be ${minutesLanguage === "ja" ? "Japanese" : "English"} only.
 2) Summary length is 50–180 characters.
-3) Section headings appear in order: Summary, Decisions, Next Actions, Timeline, Agenda, Detailed Agenda (only if applicable and placed after Agenda), Risks/Concerns, Open Questions. When absent, use 「なし」 or omit according to the rules.
+3) Section headings appear in order: Summary, Decisions, Next Actions, Timeline, Agenda, Detailed Agenda (only if applicable and placed after Agenda), Risks/Concerns, Open Questions. Omit sections that have no content as required; do not use 「なし」 for Decisions/Next Actions.
 4) Timeline lines each start with a label like [0.00 - 1.00] and there are at most 10.
 5) Detailed Agenda appears after Agenda and before Risks/Concerns when present.
 6) No fabrication; the minutes must be concise and structured.
@@ -271,6 +271,72 @@ Original transcript:
 ${transcript}`,
 	},
 ];
+
+const EMPTY_SECTION_MARKERS = new Set([
+	"なし",
+	"無し",
+	"特になし",
+	"none",
+	"n/a",
+	"na",
+	"not applicable",
+]);
+
+const normalizeEmptyMarker = (line: string): string => {
+	const trimmed = line.trim().replace(/[。.!！?？]+$/g, "");
+	return trimmed.toLowerCase();
+};
+
+const isEffectivelyEmptySection = (body: string): boolean => {
+	const trimmedBody = body.trim();
+	if (!trimmedBody) return true;
+
+	const normalizedLines = trimmedBody
+		.split(/\r?\n/)
+		.map((line) => line.replace(/^[\s*•-]+/, "").trim())
+		.filter(Boolean)
+		.map(normalizeEmptyMarker);
+
+	if (normalizedLines.length === 0) return true;
+
+	return normalizedLines.every((line) => EMPTY_SECTION_MARKERS.has(line));
+};
+
+const removeEmptySections = (summary: string): string => {
+	if (!summary.trim()) return summary;
+
+	const sectionRegex = /(^\d+\.\s.+\n)([\s\S]*?)(?=^\d+\.\s.+\n|$)/gm;
+	const sections: Array<{ title: string; body: string }> = [];
+
+	let match = sectionRegex.exec(summary);
+	while (match) {
+		const rawTitle = match[1].trim();
+		const title = rawTitle.replace(/^\d+\.\s+/, "").trim();
+		const body = match[2].trimEnd();
+		sections.push({ title, body });
+		match = sectionRegex.exec(summary);
+	}
+
+	if (sections.length === 0) return summary.trim();
+
+	const filtered = sections.filter((section) => {
+		if (section.title.startsWith("概要")) {
+			return true;
+		}
+		if (section.title.startsWith("Summary")) {
+			return true;
+		}
+		return !isEffectivelyEmptySection(section.body);
+	});
+
+	return filtered
+		.map((section, index) => {
+			const body = section.body.trim();
+			return `${index + 1}. ${section.title}\n${body}`.trimEnd();
+		})
+		.join("\n\n")
+		.trim();
+};
 
 const parseQualityCheckResult = (raw: string): QualityCheckResult => {
 	if (!raw) {
@@ -339,6 +405,7 @@ export async function summarizeTranscript(
 			summaryPreference,
 			feedback,
 		);
+		summary = removeEmptySections(summary);
 
 		const quality = await checkMinutesQuality(
 			ai,
