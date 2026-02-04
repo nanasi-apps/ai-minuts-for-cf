@@ -47,6 +47,7 @@ export default {
 						title: input.filename, // とりあえずファイル名をタイトルにする
 						videoKey: key,
 						audioKey: audioKey,
+						meetingStartTime: input.meetingStartTime,
 						userId: context.userId,
 						status: "UPLOADING",
 					},
@@ -178,6 +179,7 @@ export default {
 			summary: minuts.summary ?? null,
 			transcript: minuts.transcript ?? null,
 			subtitle: minuts.subtitle ?? null,
+			meetingStartTime: minuts.meetingStartTime ?? null,
 			videoUrl,
 			createdAt: minuts.createdAt.toISOString(),
 		};

@@ -43,7 +43,8 @@ The transcript format is:
 [start - end] text
 \`\`\`
 
-These numeric labels are **plain strings, not timestamps**. Do **not** convert or interpret them.
+Labels are either **elapsed seconds** (e.g., \`[0.00 - 1.78]\`) or **clock times**
+derived from the meeting start time (e.g., \`[10:30 - 10:31]\`). Do **not** convert or interpret them.
 Your job is to create structured minutes that satisfy every rule below.
 
 ---
@@ -51,7 +52,7 @@ Your job is to create structured minutes that satisfy every rule below.
 # CRITICAL RULES
 
 1) **Timestamp handling**
-   * Labels such as \`[0.00 - 1.78]\` are not time values.
+   * Labels may be elapsed seconds or actual clock times.
    * Treat them as raw strings and copy them exactly in the Timeline.
 
 2) **Output language**
@@ -86,7 +87,7 @@ Your job is to create structured minutes that satisfy every rule below.
 4. タイムライン（Timeline）
    * Max 10 bullets; 1 bullet = 1 key event.
    * Each bullet starts with the exact label \`[start - end]\` followed by a brief event.
-   * No quotes; never convert labels.
+   * Labels can be \`[0.00 - 1.00]\` or \`[10:30 - 10:31]\`. Never convert them.
 
 5. 議題（Agenda）
    * Include only if explicit agenda items exist (e.g., 「本日の議題は〜」). Otherwise omit.
@@ -255,12 +256,13 @@ const buildQualityCheckMessages = (
 	},
 	{
 		role: "user",
-		content: `Validate whether the minutes meet the specification. Reply ONLY with JSON in the format {"passed": boolean, "feedback": "If problems exist, explain them concisely in Japanese"}.
+		content: `Validate whether the minutes meet the specification.
+Reply ONLY with JSON in the format {"passed": boolean, "feedback": "If problems exist, explain them concisely in Japanese"}.
 Checks:
 1) Output language must be ${minutesLanguage === "ja" ? "Japanese" : "English"} only.
 2) Summary length is 50–180 characters.
 3) Section headings appear in order: Summary, Decisions, Next Actions, Timeline, Agenda, Detailed Agenda (only if applicable and placed after Agenda), Risks/Concerns, Open Questions. When absent, use 「なし」 or omit according to the rules.
-4) Timeline lines each start with a label like [0.00 - 1.00] and there are at most 10.
+4) Timeline lines each start with a label like [0.00 - 1.00] or [10:30 - 10:31] and there are at most 10.
 5) Detailed Agenda appears after Agenda and before Risks/Concerns when present.
 6) No fabrication; the minutes must be concise and structured.
 ---
