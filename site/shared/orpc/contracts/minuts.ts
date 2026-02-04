@@ -11,6 +11,7 @@ const generatePresignedUrl = oc
 			filename: z.string().min(1),
 			contentType: z.enum(["video/mp4", "audio/mpeg", "audio/wav"]),
 			fileSize: z.number().int().positive(),
+			meetingStartTime: z.string().min(1).optional(),
 			audio: z
 				.object({
 					filename: z.string().min(1),
@@ -76,6 +77,7 @@ const get = oc
 			summary: z.string().nullable(),
 			transcript: z.string().nullable(),
 			subtitle: z.string().nullable(),
+			meetingStartTime: z.string().nullable(),
 			videoUrl: z.string().nullable(),
 			createdAt: z.string(),
 		}),

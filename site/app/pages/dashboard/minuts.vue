@@ -20,6 +20,7 @@ const isUploading = ref(false);
 const uploadProgress = ref(0);
 const errorMessage = ref<string | null>(null);
 const statusMessage = ref("アップロード中...");
+const meetingStartTime = ref("");
 
 const handleFileSelect = async (file: File) => {
 	if (isUploading.value) return;
@@ -66,6 +67,7 @@ const handleFileSelect = async (file: File) => {
 				filename: file.name,
 				contentType: file.type as "video/mp4" | "audio/mpeg" | "audio/wav",
 				fileSize: file.size,
+				meetingStartTime: meetingStartTime.value.trim() || undefined,
 				audio:
 					audioBlob && audioFileName && audioContentType
 						? {
@@ -180,7 +182,22 @@ const uploadToR2 = (
       </div>
     </div>
 
-    <FileInput v-else @select="handleFileSelect" />
+    <div v-else class="space-y-4">
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+          会議開始時刻（任意）
+        </label>
+        <input
+          v-model="meetingStartTime"
+          type="datetime-local"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-stone-900 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-500/30"
+        />
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          入力した時刻を基準にタイムラインを実時刻へ変換します。
+        </p>
+      </div>
+      <FileInput @select="handleFileSelect" />
+    </div>
   </div>
 </template>
 

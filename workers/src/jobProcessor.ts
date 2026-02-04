@@ -79,6 +79,76 @@ async function completeMinuts(
 		.run();
 }
 
+const TIMELINE_LABEL_PATTERN = /^\[(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\]/;
+
+const parseMeetingStartTime = (value: unknown): number | null => {
+	if (typeof value !== "string" || !value.trim()) {
+		return null;
+	}
+
+	const parsedDate = new Date(value);
+	if (!Number.isNaN(parsedDate.getTime())) {
+		return parsedDate.getHours() * 3600 + parsedDate.getMinutes() * 60;
+	}
+
+	const match = value.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+	if (!match) {
+		return null;
+	}
+
+	const hours = Number(match[1]);
+	const minutes = Number(match[2]);
+	const seconds = match[3] ? Number(match[3]) : 0;
+	if (Number.isNaN(hours) || Number.isNaN(minutes) || Number.isNaN(seconds)) {
+		return null;
+	}
+
+	return hours * 3600 + minutes * 60 + seconds;
+};
+
+const formatClockLabel = (totalSeconds: number): string => {
+	const normalized = ((totalSeconds % 86400) + 86400) % 86400;
+	const hours = Math.floor(normalized / 3600)
+		.toString()
+		.padStart(2, "0");
+	const minutes = Math.floor((normalized % 3600) / 60)
+		.toString()
+		.padStart(2, "0");
+	return `${hours}:${minutes}`;
+};
+
+const applyMeetingStartTime = (
+	transcript: string,
+	meetingStartTimeSeconds: number | null,
+): string => {
+	if (meetingStartTimeSeconds === null) {
+		return transcript;
+	}
+
+	return transcript
+		.split("\n")
+		.map((line) => {
+			const match = line.match(TIMELINE_LABEL_PATTERN);
+			if (!match) return line;
+
+			const startSeconds = Number(match[1]);
+			const endSeconds = Number(match[2]);
+			if (Number.isNaN(startSeconds) || Number.isNaN(endSeconds)) {
+				return line;
+			}
+
+			const startLabel = formatClockLabel(
+				meetingStartTimeSeconds + startSeconds,
+			);
+			const endLabel = formatClockLabel(meetingStartTimeSeconds + endSeconds);
+			return line.replace(
+				TIMELINE_LABEL_PATTERN,
+				`[${startLabel} - ${endLabel}]`,
+			);
+		})
+		.join("\n");
+};
+
 async function buildTranscript(
 	env: Env,
 	action: Job["payload"]["action"],
@@ -124,8 +194,20 @@ export async function processMinutsJob(env: Env, job: Job): Promise<void> {
 		minuts.subtitle as string | null,
 	);
 
+	const meetingStartTimeSeconds = parseMeetingStartTime(
+		minuts.meetingStartTime,
+	);
+	const transcriptForSummary = applyMeetingStartTime(
+		transcript,
+		meetingStartTimeSeconds,
+	);
+
 	console.log("[Processor] Starting summarization...");
-	const summary = await summarizeTranscript(env.AI, transcript, userSettings);
+	const summary = await summarizeTranscript(
+		env.AI,
+		transcriptForSummary,
+		userSettings,
+	);
 	console.log("[Processor] Summarization complete.");
 
 	await completeMinuts(env, job.payload.minutsId, transcript, summary, vtt);
