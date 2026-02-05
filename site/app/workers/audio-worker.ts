@@ -119,6 +119,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
 			}
 
 			default:
+				// biome-ignore lint/suspicious/noExplicitAny: type check for exhaustive switch
 				throw new Error(`Unknown message type: ${(message as any).type}`);
 		}
 	} catch (error) {
