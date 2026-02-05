@@ -11,7 +11,7 @@ definePageMeta({
 	middleware: ["auth"],
 });
 
-import { extractAudioFromVideo } from "@/app/utils/audio";
+import { useAudioExtractor } from "@/app/composables/useAudioExtractor";
 
 const api = useApi();
 const { addToast } = useToast();
@@ -20,6 +20,14 @@ const isUploading = ref(false);
 const uploadProgress = ref(0);
 const errorMessage = ref<string | null>(null);
 const statusMessage = ref("アップロード中...");
+
+const {
+	isProcessing: isExtracting,
+	progress: extractionProgress,
+	stage: extractionStage,
+	extractAudioFromVideo,
+	cancel: cancelExtraction,
+} = useAudioExtractor();
 
 const handleFileSelect = async (file: File) => {
 	if (isUploading.value) return;
@@ -36,6 +44,20 @@ const handleFileSelect = async (file: File) => {
 	uploadProgress.value = 0;
 	statusMessage.value = "準備中...";
 
+	// Show extraction status if video
+	if (file.type.startsWith("video/")) {
+		watch(
+			[isExtracting, extractionStage, extractionProgress],
+			([isProcessing, stage, progress]) => {
+				if (isProcessing) {
+					statusMessage.value = `${stage}... (${progress}%)`;
+					uploadProgress.value = Math.floor(progress * 0.6); // Extraction is 60% of upload
+				}
+			},
+			{ immediate: true },
+		);
+	}
+
 	try {
 		let audioBlob: Blob | null = null;
 		let audioFileName: string | null = null;
@@ -43,7 +65,6 @@ const handleFileSelect = async (file: File) => {
 
 		// Extract audio if video
 		if (file.type.startsWith("video/")) {
-			statusMessage.value = "動画から音声を抽出中...";
 			try {
 				audioBlob = await extractAudioFromVideo(file);
 				audioFileName = `${file.name.replace(/\.[^/.]+$/, "")}.mp3`;
@@ -59,6 +80,11 @@ const handleFileSelect = async (file: File) => {
 		}
 
 		statusMessage.value = "アップロード中...";
+
+		// Adjust progress after extraction is done
+		if (file.type.startsWith("video/")) {
+			uploadProgress.value = 60; // Start upload progress at 60% after extraction
+		}
 
 		// 1. Generate Presigned URL
 		const { uploadUrl, minutsId, audioUploadUrl } =
@@ -119,7 +145,18 @@ const uploadToR2 = (
 
 		xhr.upload.addEventListener("progress", (event) => {
 			if (event.lengthComputable) {
-				uploadProgress.value = Math.round((event.loaded / event.total) * 100);
+				let progress = Math.round((event.loaded / event.total) * 100);
+
+				// Adjust progress for video files (extraction took first 60%)
+				if (
+					event.target instanceof XMLHttpRequest &&
+					event.target.upload &&
+					extractionProgress.value > 0
+				) {
+					progress = Math.round(60 + progress * 0.4);
+				}
+
+				uploadProgress.value = progress;
 			}
 		});
 
