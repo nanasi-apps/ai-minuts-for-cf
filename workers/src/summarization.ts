@@ -64,83 +64,69 @@ Requirements:
 
 ## **2. 決定事項（Decisions）**
 
-### Extraction Targets (MUST include)
+### Extraction Targets
 
-**[Definitive Decision Expressions]**
-Extract statements containing these keywords as decisions:
-- "〜と決定" (decided as ~), "〜を決定" (decide ~), "決定した" (have decided), "決定事項" (decision item)
-- "〜を承認" (approve ~), "承認した" (have approved), "承認します" (will approve)
-- "〜に合意" (agree on ~), "合意した" (have agreed), "合意に至った" (have reached agreement)
-- "〜を了承" (acknowledge ~), "了承した" (have acknowledged), "了承を得た" (obtained acknowledgment)
-- "〜を確認" (confirm ~), "確認した" (have confirmed), "確認できた" (were able to confirm)
+**[High-Confidence - Extract directly]**
+- Definitive: 「決定」「確定」「承認」「可決」「採択」「議決」
+- Agreement: 「合意」「了承」「認める」「成立」
+- Parliamentary: 「全会一致」「賛成多数」「異議なく」「原案どおり」
 
-**[Action Decision Expressions]**
-Also treat these patterns as decisions:
-- "〜で進める" (proceed with ~), "〜で進めていく" (will proceed with ~), "〜で進めたい" (want to proceed with ~)
-- "〜ということで" (so, ~ it is), "〜ということになりました" (it has been decided that ~)
-- "〜とする" (make it ~), "〜とします" (will make it ~), "〜としました" (made it ~)
-- "〜に決まった" (was decided to be ~), "〜になった" (became ~), "〜となりました" (has become ~)
-- "〜することにした" (decided to do ~), "〜することになった" (it has been arranged that ~)
+**[Medium-Confidence - Extract with context]**
+- Directional: 「〜で進める」「〜とする」「〜ということで」「〜に決まった」「〜することになった」
+- Implicit: 「〜で行く」「〜を採用」「〜を実施する」「〜の方向で」
 
-### Exclusion Criteria (Do NOT treat as decisions)
+**[Low-Confidence - Add "（要確認）"]**
+- 「〜を確認」(only when confirming a decision, not information)
+- 「〜で良い」「〜で問題ない」(only when finalizing a choice)
 
-Do NOT consider statements containing these as decisions:
-- "検討" (consider), "検討したい" (want to consider), "検討する必要" (need to consider)
-- "検討中" (under consideration), "見直し" (review), "見直したい" (want to review)
-- "仮決定" (tentative decision), "暫定" (provisional), "一旦" (for now), "仮の" (temporary)
-- "〜かもしれない" (might be ~), "〜ではないか" (isn't it ~), "〜だろう" (probably ~)
-- "〜と思う" (I think ~), "〜と考えている" (am considering ~), "〜を考えたい" (want to think about ~)
-- "〜について話した" (talked about ~), "〜について議論した" (discussed ~) (when content is unclear)
+### Exclusion Criteria (NEVER extract)
+
+- Under review: 「検討」「見直し」「再検討」「審議中」「協議中」
+- Tentative: 「仮決定」「暫定」「一旦」「当面」「とりあえず」
+- Uncertain: 「〜かもしれない」「〜だろう」「〜と思う」「〜と考えている」
+- Proposal: 「提案」「希望」「要望」「〜してはどうか」「素案」「たたき台」
+- Inconclusive: 「〜について議論した」「意見交換」「今後の課題」「継続審議」
 
 ### Fallback Policy
 
-* Add "（要確認）" (needs confirmation) when decision confidence is low
-* Write "なし" (none) when uncertain, and include details in Timeline
-* Include discussion context in Summary when relevant
+- High: Clear keyword + clear scope → extract as-is
+- Medium: Implicit expression + clear scope → extract with context
+- Low: Keyword present but scope vague → add "（要確認）"
+- None: Only exclusion expressions → write "なし"
 
 ---
 
 ## **3. 次のアクション（Next Actions）**
 
-### Extraction Targets (MUST include)
+### Extraction Targets
 
-**[Assignee Explicit Patterns]**
-Tasks containing any of these:
-- "〜さんが" (Mr./Ms. ~ will), "〜さんに" (to Mr./Ms. ~), "〜さんより" (from Mr./Ms. ~)
-- "〜担当で" (in charge of ~), "〜の担当" (in charge of ~), "〜を担当" (take charge of ~)
-- "〜をお願い" (request to ~), "〜お願いします" (please do ~), "〜お願いしたい" (would like to request ~)
+**[High-Confidence - Extract directly]**
+- Assignee explicit: 「〜さんが」「〜担当」「〜にお願い」「〜課が」「〜部が」「事務局が」
+- Formal assignment: 「〜に一任」「〜に委任」「〜に依頼」「〜の責任で」
+- Deadline explicit: 「〜までに」「来週」「来月」「次回までに」「今週中」「速やかに」「至急」
 
-**[Deadline Explicit Patterns]**
-Tasks with deadlines:
-- "〜までに" (by ~), "〜までにお願い" (please by ~)
-- "来週" (next week), "来月" (next month), "次回までに" (by next time)
-- "今週中" (this week), "来週中" (next week), "〜日まで" (by ~ day)
+**[Medium-Confidence - Add assignee/deadline annotation if missing]**
+- Action verbs: 「実施します」「対応します」「確認します」「準備します」「報告します」「調整します」「作成します」「連絡します」
+- Follow-up: 「次回報告」「次回確認」「後日」「改めて」
 
-**[Action Verb Patterns]**
-Specific tasks containing these verbs:
-- "行います" (will do), "実施します" (will implement), "対応します" (will handle)
-- "進めます" (will proceed), "推進します" (will promote), "進捗させます" (will advance)
-- "確認します" (will confirm), "確認いたします" (will confirm - polite), "確認取ります" (will get confirmation)
-- "準備します" (will prepare), "整備します" (will arrange), "作成します" (will create)
-- "連絡します" (will contact), "報告します" (will report), "連絡取ります" (will get in touch)
-- "調整します" (will coordinate), "調整いたします" (will coordinate - polite)
+**[Low-Confidence - Add "（要確認）"]**
+- 「〜を検討して報告」「〜を確認して連絡」(extract if deadline/assignee present)
 
-### Exclusion Criteria (Do NOT treat as actions)
+### Exclusion Criteria (NEVER extract)
 
-Do NOT consider statements containing these as actions:
-- "検討します" (will consider), "検討いたします" (will consider - polite) (content unclear)
-- "〜したい" (want to do ~), "〜したいと思います" (would like to do ~) (intention only)
-- "〜かもしれません" (might ~), "〜か検討します" (will consider whether ~) (uncertain)
-- "〜を考えます" (will think about ~), "〜を見てみます" (will take a look at ~) (exploratory)
-- "必要であれば" (if necessary), "必要なら" (if needed) (conditional/uncertain)
-- "〜します" without clear subject (who will do it is unclear)
+- Exploratory: 「検討します」(when deliverable unclear)「〜を考えます」「〜を見てみます」
+- Intent only: 「〜したい」「〜したいと思います」
+- Uncertain: 「〜かもしれません」「〜か検討します」
+- Conditional: 「必要であれば」「可能であれば」「余裕があれば」「状況を見て」
+- Vague: 「引き続き」(no specific step)「今後」(no deadline)「いずれ」「適宜」
+- Past completed: 「〜しました」「〜を行った」(unless tied to next steps)
 
 ### Fallback Policy
 
-* Write "担当：要確認" (assignee: needs confirmation) when assignee is unclear
-* Write "期限：要調整" (deadline: needs adjustment) when deadline is unclear
-* Add "（要確認）" when action confidence is low
-* Write "なし" when uncertain, and include in Timeline
+- High: Assignee + task clear → [Assignee] [Task] [Deadline if any]
+- Medium: Task clear but assignee unclear → add "担当：要確認"
+- Low: Action verb present but scope vague → add "（要確認）"
+- None: Only exclusion expressions → write "なし"
 
 ---
 
