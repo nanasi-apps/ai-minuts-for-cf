@@ -16,27 +16,6 @@ export function useAudioExtractor() {
 				{ type: "module" },
 			);
 
-			worker.value.onmessage = (event: MessageEvent) => {
-				const message = event.data;
-
-				switch (message.type) {
-					case "progress":
-						progress.value = message.percentage;
-						stage.value = message.stage;
-						break;
-					case "result":
-						return message.mp3Buffer;
-					case "error":
-						error.value = message.error;
-						break;
-				}
-			};
-
-			worker.value.onerror = (event) => {
-				error.value = `Worker error: ${event.message}`;
-				console.error("[AudioExtractor] Worker error:", event);
-			};
-
 			return worker.value;
 		} catch (err) {
 			error.value = `Failed to initialize worker: ${err}`;
@@ -59,6 +38,29 @@ export function useAudioExtractor() {
 		if (!audioWorker) {
 			throw new Error("Failed to initialize audio worker");
 		}
+
+		audioWorker.onmessage = (event: MessageEvent) => {
+			const message = event.data;
+
+			switch (message.type) {
+				case "progress":
+					progress.value = message.percentage;
+					stage.value = message.stage;
+					break;
+				case "result":
+					break;
+				case "error":
+					error.value = message.error;
+					isProcessing.value = false;
+					break;
+			}
+		};
+
+		audioWorker.onerror = (event) => {
+			error.value = `Worker error: ${event.message}`;
+			isProcessing.value = false;
+			console.error("[AudioExtractor] Worker error:", event);
+		};
 
 		try {
 			stage.value = "音声データを読み込み中...";
