@@ -20,6 +20,12 @@ model User {
   
   /// 自己紹介文（プロフィール編集で設定可能）
   bio       String?
+
+  /// 議事録の要約に関するユーザーの希望（120文字以内）
+  summaryPreference String  @default("")
+
+  /// 議事録の生成に使用する言語設定
+  minutesLanguage   String  @default("ja")
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -1,68 +1,102 @@
 type AiBinding = Env["AI"];
+export type MinutesLanguage = "ja" | "en";
 
-const SYSTEM_PROMPT = `
-**CRITICAL: All system instructions are in English.**
-**CRITICAL: All final output MUST be written entirely in Japanese.**
+type SummarizationOptions = {
+	minutesLanguage?: MinutesLanguage;
+	summaryPreference?: string;
+};
 
-You are a highly accurate meeting-minutes editor AI specialized in administrative committee transcripts.
-You will receive a transcript in the form:
+type QualityCheckResult = {
+	passed: boolean;
+	feedback: string;
+};
+
+const SUMMARY_PREFERENCE_MAX_LENGTH = 120;
+
+const LANGUAGE_OUTPUT_RULES: Record<
+	MinutesLanguage,
+	{ finalInstruction: string; tone: string }
+> = {
+	ja: {
+		finalInstruction:
+			"**The final answer must be written entirely in Japanese.**",
+		tone: "Formal, neutral Japanese suitable for official meeting minutes.",
+	},
+	en: {
+		finalInstruction:
+			"**The final answer must be written entirely in English.**",
+		tone: "Formal, neutral English suitable for official meeting minutes.",
+	},
+};
+
+const buildSystemPrompt = (minutesLanguage: MinutesLanguage) => {
+	const languageRules = LANGUAGE_OUTPUT_RULES[minutesLanguage];
+
+	return `
+**System language: English (instructions only)**
+${languageRules.finalInstruction}
+
+You are an accurate meeting-minutes editor for administrative committee transcripts.
+The transcript format is:
 
 \`\`\`
 [start - end] text
 \`\`\`
 
-These numeric labels **ARE NOT time values**.
-They **must be treated strictly as raw strings**, with **no conversion, no interpretation**.
-
-Your task is to transform the transcript into structured meeting minutes that follow all constraints below.
+These numeric labels are **plain strings, not timestamps**. Do **not** convert or interpret them.
+Your job is to create structured minutes that satisfy every rule below.
 
 ---
 
-# **CRITICAL RULES**
+# CRITICAL RULES
 
-## **1. Timestamp Handling**
+1) **Timestamp handling**
+   * Labels such as \`[0.00 - 1.78]\` are not time values.
+   * Treat them as raw strings and copy them exactly in the Timeline.
 
-* \`[0.00 - 1.78]\` is **not** minutes, seconds, or time.
-* Treat segment labels **as plain strings**.
-* **Never convert** them (no rounding, formatting, or changing decimals).
-* In the Timeline section, **copy them exactly as-is**.
+2) **Output language**
+   * ${languageRules.finalInstruction}
+   * Do not use any other language in the final answer.
 
-## **2. Output Language**
+3) **No fabrication**
+   * Do not infer decisions, actions, agendas, risks, or concerns.
+   * Only include statements explicitly present in the transcript.
 
-**The final answer must be written entirely in Japanese.**
-
-No English in the final answer except for the section headers which are provided in Japanese with English translations for your reference.
-
-## **3. No Fabrication**
-
-* Do not infer decisions, actions, agendas, risks, or concerns.
-* Only include what is explicitly stated.
-
-## **4. Speaker Neutrality**
-
-* Do not guess speakers.
-* Only use speaker names if explicitly stated (e.g., 課長, 委員).
+4) **Speaker neutrality**
+   * Do not guess speakers.
+   * Use speaker names only when explicitly provided (e.g., 課長, 委員).
 
 ---
 
-# **OUTPUT FORMAT (ALL CONTENT IN JAPANESE)**
+# OUTPUT FORMAT (use the target output language for section titles and content)
 
-You must produce the following sections, in this order:
+1. 概要（Summary）
+   * 50–180 characters.
+   * Concise main points only; **no timeline info**.
 
----
+2. 決定事項（Decisions）
+   * Only items explicitly marked as decisions/approvals/agreements.
+   * If none: 「なし」.
 
-## **1. 概要（Summary）**
+3. 次のアクション（Next Actions）
+   * Include tasks clearly verbalized as actions (e.g., 「〜を行います」「〜を進めます」「〜をお願いします」).
+   * No inferred tasks.
+   * If none: 「なし」.
 
-Requirements:
+4. タイムライン（Timeline）
+   * Max 10 bullets; 1 bullet = 1 key event.
+   * Each bullet starts with the exact label \`[start - end]\` followed by a brief event.
+   * No quotes; never convert labels.
 
-* Must be **50–180 Japanese characters**.
-* Concise and focused on the main points.
-* **Do NOT include timeline info**.
-* No unnecessary details.
+5. 議題（Agenda）
+   * Include only if explicit agenda items exist (e.g., 「本日の議題は〜」). Otherwise omit.
 
----
-
-## **2. 決定事項（Decisions）**
+6. 議題別概要（Detailed Agenda）
+   * Appears **after Agenda** and **before Risks/Concerns** when Major Agenda items exist.
+   * For each Major Agenda item (policies/strategies/core matters, significant decisions, lengthy explanations, or Q&A topics):
+     - Provide a sub-summary of **150–300 characters**.
+     - Cover purpose, key explanation points, Q&A highlights (if any), and explicitly stated policy background/objectives.
+   * No inference or speculation. Non-major agenda items stay only in Agenda.
 
 ### Extraction Targets
 
@@ -113,6 +147,11 @@ Requirements:
 - 「〜を検討して報告」「〜を確認して連絡」(extract if deadline/assignee present)
 
 ### Exclusion Criteria (NEVER extract)
+
+* ${languageRules.tone}
+* Concise, factual, and non-redundant.
+* No meta-comments or reasoning.
+* Do not reorder events beyond the Timeline.
 
 - Exploratory: 「検討します」(when deliverable unclear)「〜を考えます」「〜を見てみます」
 - Intent only: 「〜したい」「〜したいと思います」
@@ -210,168 +249,319 @@ If none: omit.
 
 5. Non-major agenda items remain simple bullet points in the Agenda section only, without detailed summaries.
 `;
+};
+const normalizeMinutesLanguage = (language: unknown): MinutesLanguage => {
+	return language === "en" ? "en" : "ja";
+};
+
+const normalizeSummaryPreference = (preference: unknown): string => {
+	if (typeof preference !== "string") return "";
+	return preference.trim().slice(0, SUMMARY_PREFERENCE_MAX_LENGTH);
+};
+
+const extractAssistantContent = (llmResponse: unknown): string => {
+	const content =
+		// @ts-expect-error - The type definition might not match the actual response structure for this model
+		llmResponse?.output_text?.[llmResponse.output_text.length - 1]?.content;
+
+	if (content) {
+		return content as string;
+	}
+
+	// Fallback: check if output_text is a direct string
+	// biome-ignore lint/suspicious/noExplicitAny: 型が曖昧なので any で扱う
+	if (typeof (llmResponse as any)?.output_text === "string") {
+		// biome-ignore lint/suspicious/noExplicitAny: 型が曖昧なので any で扱う
+		return (llmResponse as any).output_text as string;
+	}
+
+	// Fallback: check for standard 'response' field
+	if (typeof llmResponse === "object" && llmResponse !== null) {
+		const responseCandidate = llmResponse as { response?: unknown };
+		if (typeof responseCandidate.response === "string") {
+			return responseCandidate.response;
+		}
+	}
+
+	// Fallback: check for 'output' array format (new format seen in logs)
+	// biome-ignore lint/suspicious/noExplicitAny: 型が曖昧なので any で扱う
+	if (Array.isArray((llmResponse as any)?.output)) {
+		// biome-ignore lint/suspicious/noExplicitAny: 型が曖昧なので any で扱う
+		const assistantMessage = (llmResponse as any).output.find(
+			// biome-ignore lint/suspicious/noExplicitAny: 型かおかしいのでこれでいい
+			(item: any) => item.role === "assistant" && item.type === "message",
+		);
+
+		if (assistantMessage) {
+			// biome-ignore lint/suspicious/noExplicitAny: 型が曖昧なので any で扱う
+			const msg = assistantMessage as any;
+			if (typeof msg.content === "string") {
+				return msg.content;
+			}
+			if (Array.isArray(msg.content)) {
+				// Assuming content is an array of strings or objects with text
+				return (
+					msg.content
+						// biome-ignore lint/suspicious/noExplicitAny: 型が曖昧なので any で扱う
+						.map((part: any) => {
+							if (typeof part === "string") return part;
+							if (typeof part === "object" && part.text) return part.text;
+							return "";
+						})
+						.join("")
+				);
+			}
+		}
+	}
+
+	return "";
+};
+
+const buildPreferencePrompt = (
+	summaryPreference: string,
+	minutesLanguage: MinutesLanguage,
+): string => {
+	const instructions = normalizeSummaryPreference(summaryPreference);
+	const languageLabel = minutesLanguage === "ja" ? "日本語" : "英語";
+
+	if (!instructions) {
+		return `No extra user instructions. Follow the required format in the target language (${languageLabel}).`;
+	}
+
+	return `User preference: ${instructions}\nRespect this request and write the minutes in the target language (${languageLabel}).`;
+};
+
+const buildSummarizationMessages = (
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => [
+	{ role: "system", content: buildSystemPrompt(minutesLanguage) },
+	{
+		role: "user",
+		content: buildPreferencePrompt(summaryPreference, minutesLanguage),
+	},
+	{
+		role: "user",
+		content: `Here is the meeting transcript. Identify speakers only when explicit and organize key points into clear, structured minutes.
+\`\`\`
+${transcript}
+\`\`\`
+
+Follow all instructions above and produce the minutes.`,
+	},
+];
+
+const buildFeedbackAwareSummarizationMessages = (
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+	feedback: string,
+) => {
+	if (!feedback) {
+		return buildSummarizationMessages(
+			transcript,
+			minutesLanguage,
+			summaryPreference,
+		);
+	}
+
+	return [
+		...buildSummarizationMessages(
+			transcript,
+			minutesLanguage,
+			summaryPreference,
+		),
+		{
+			role: "user",
+			content: `Quality issues detected in the previous draft: ${feedback}\nRegenerate the minutes resolving every issue.`,
+		},
+	];
+};
+
+const buildQualityCheckMessages = (
+	transcript: string,
+	summary: string,
+	minutesLanguage: MinutesLanguage,
+) => [
+	{
+		role: "system",
+		content:
+			"You are a strict quality inspector for meeting minutes. Respond only with minified JSON and no other text.",
+	},
+	{
+		role: "user",
+		content: `Validate whether the minutes meet the specification. Reply ONLY with JSON in the format {"passed": boolean, "feedback": "If problems exist, explain them concisely in Japanese"}.
+Checks:
+1) Output language must be ${minutesLanguage === "ja" ? "Japanese" : "English"} only.
+2) Summary length is 50–180 characters.
+3) Section headings appear in order: Summary, Decisions, Next Actions, Timeline, Agenda, Detailed Agenda (only if applicable and placed after Agenda), Risks/Concerns, Open Questions. When absent, use 「なし」 or omit according to the rules.
+4) Timeline lines each start with a label like [0.00 - 1.00] and there are at most 10.
+5) Detailed Agenda appears after Agenda and before Risks/Concerns when present.
+6) No fabrication; the minutes must be concise and structured.
+---
+Minutes:
+${summary}
+---
+Original transcript:
+${transcript}`,
+	},
+];
+
+const parseQualityCheckResult = (raw: string): QualityCheckResult => {
+	if (!raw) {
+		return { passed: false, feedback: "品質検証の応答が空でした。" };
+	}
+
+	try {
+		const parsed = JSON.parse(raw) as {
+			passed?: unknown;
+			feedback?: unknown;
+		};
+
+		return {
+			passed: parsed.passed === true,
+			feedback:
+				typeof parsed.feedback === "string"
+					? parsed.feedback
+					: "品質検証結果を読み取れませんでした。",
+		};
+	} catch (error) {
+		console.warn("[Summarization] Failed to parse quality check JSON.", error);
+		return {
+			passed: false,
+			feedback: "品質検証結果の解析に失敗しました。",
+		};
+	}
+};
+
+const checkMinutesQuality = async (
+	ai: AiBinding,
+	transcript: string,
+	summary: string,
+	minutesLanguage: MinutesLanguage,
+): Promise<QualityCheckResult> => {
+	const llmResponse = await ai.run("@cf/openai/gpt-oss-20b", {
+		input: buildQualityCheckMessages(
+			transcript,
+			summary,
+			minutesLanguage,
+		) as ResponseInput,
+	});
+
+	const content = extractAssistantContent(llmResponse);
+	return parseQualityCheckResult(content);
+};
+
+const MAX_SUMMARIZATION_ATTEMPTS = 2;
 
 export async function summarizeTranscript(
 	ai: AiBinding,
 	transcript: string,
+	options?: SummarizationOptions,
 ): Promise<string> {
-	// const llmResponse = await summarizeGPTOSS120B(ai, transcript);
-	// const llmResponse = await summarizeGemma3_12B(ai, transcript);
-	const llmResponse = await summarizeGPTOSS20B(ai, transcript);
+	const targetLanguage = normalizeMinutesLanguage(options?.minutesLanguage);
+	const summaryPreference = normalizeSummaryPreference(
+		options?.summaryPreference,
+	);
+	let feedback = "";
+	let summary = "";
 
-	return llmResponse;
+	for (let attempt = 1; attempt <= MAX_SUMMARIZATION_ATTEMPTS; attempt += 1) {
+		summary = await summarizeGPTOSS20B(
+			ai,
+			transcript,
+			targetLanguage,
+			summaryPreference,
+			feedback,
+		);
+
+		const quality = await checkMinutesQuality(
+			ai,
+			transcript,
+			summary,
+			targetLanguage,
+		);
+
+		if (quality.passed) {
+			return summary;
+		}
+
+		feedback =
+			quality.feedback ||
+			"出力フォーマットと品質要件をすべて満たすよう修正してください。";
+
+		console.warn(
+			`[Summarization] Quality check failed (attempt ${attempt}/${MAX_SUMMARIZATION_ATTEMPTS}): ${feedback}`,
+		);
+	}
+
+	return summary;
 }
 
-const summarizeGPTOSS20B = async (ai: AiBinding, transcript: string) => {
+const summarizeGPTOSS20B = async (
+	ai: AiBinding,
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+	feedback: string,
+) => {
 	const llmResponse = await ai.run("@cf/openai/gpt-oss-20b", {
-		input: [
-			{ role: "system", content: SYSTEM_PROMPT },
-			{
-				role: "user",
-				content: `The following is a meeting transcript. Please identify speakers and organize key points to create clear, structured meeting minutes.
-
-\`\`\`
-${transcript}
-\`\`\`
-
-Please create meeting minutes following the instructions above.`,
-			},
-		],
+		input: buildFeedbackAwareSummarizationMessages(
+			transcript,
+			minutesLanguage,
+			summaryPreference,
+			feedback,
+		) as ResponseInput,
 	});
 	console.log("[Summarization] LLM response received.");
 
-	// Safely extract the content from the response
-	// Assuming the structure is { output_text: Array<{ content: string }> } based on previous usage
-	const content =
-		// @ts-expect-error - The type definition might not match the actual response structure for this model
-		llmResponse?.output_text?.[llmResponse.output_text.length - 1]?.content;
+	const content = extractAssistantContent(llmResponse);
 
 	if (content) {
 		console.log(content);
 		return content;
 	}
 
-	// Fallback: check if output_text is a direct string
-	if (typeof llmResponse?.output_text === "string") {
-		return llmResponse.output_text;
-	}
-
-	// Fallback: check for standard 'response' field
-	if ("response" in llmResponse && typeof llmResponse.response === "string") {
-		return llmResponse.response;
-	}
-
-	// Fallback: check for 'output' array format (new format seen in logs)
-	if (Array.isArray(llmResponse?.output)) {
-		const assistantMessage = llmResponse.output.find(
-			// biome-ignore lint/suspicious/noExplicitAny: 型かおかしいのでこれでいい
-			(item: any) => item.role === "assistant" && item.type === "message",
-		);
-
-		if (assistantMessage) {
-			// biome-ignore lint/suspicious/noExplicitAny: 型かおかしいのでこれでいい
-			const msg = assistantMessage as any;
-			if (typeof msg.content === "string") {
-				return msg.content;
-			}
-			if (Array.isArray(msg.content)) {
-				// Assuming content is an array of strings or objects with text
-				return (
-					msg.content
-						// biome-ignore lint/suspicious/noExplicitAny: 型かおかしいのでこれでいい
-						.map((part: any) => {
-							if (typeof part === "string") return part;
-							if (typeof part === "object" && part.text) return part.text;
-							return "";
-						})
-						.join("")
-				);
-			}
-		}
-	}
-
 	return "";
 };
-const _summarizeGPTOSS120B = async (ai: AiBinding, transcript: string) => {
+const _summarizeGPTOSS120B = async (
+	ai: AiBinding,
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => {
 	const llmResponse = await ai.run("@cf/openai/gpt-oss-120b", {
-		input: [
-			{ role: "system", content: SYSTEM_PROMPT },
-			{
-				role: "user",
-				content: `The following is a meeting transcript. Please identify speakers and organize key points to create clear, structured meeting minutes.
-
-\`\`\`
-${transcript}
-\`\`\`
-
-Please create meeting minutes following the instructions above.`,
-			},
-		],
+		input: buildSummarizationMessages(
+			transcript,
+			minutesLanguage,
+			summaryPreference,
+		) as ResponseInput,
 	});
 	console.log("[Summarization] LLM response received.");
 
-	// Safely extract the content from the response
-	// Assuming the structure is { output_text: Array<{ content: string }> } based on previous usage
-	const content =
-		// @ts-expect-error - The type definition might not match the actual response structure for this model
-		llmResponse?.output_text?.[llmResponse.output_text.length - 1]?.content;
+	const content = extractAssistantContent(llmResponse);
 
 	if (content) {
 		console.log(content);
 		return content;
 	}
 
-	// Fallback: check if output_text is a direct string
-	if (typeof llmResponse?.output_text === "string") {
-		return llmResponse.output_text;
-	}
-
-	// Fallback: check for standard 'response' field
-	if ("response" in llmResponse && typeof llmResponse.response === "string") {
-		return llmResponse.response;
-	}
-
-	// Fallback: check for 'output' array format (new format seen in logs)
-	if (Array.isArray(llmResponse?.output)) {
-		const assistantMessage = llmResponse.output.find(
-			// biome-ignore lint/suspicious/noExplicitAny: 型かおかしいのでこれでいい
-			(item: any) => item.role === "assistant" && item.type === "message",
-		);
-
-		if (assistantMessage) {
-			// biome-ignore lint/suspicious/noExplicitAny: 型かおかしいのでこれでいい
-			const msg = assistantMessage as any;
-			if (typeof msg.content === "string") {
-				return msg.content;
-			}
-			if (Array.isArray(msg.content)) {
-				// Assuming content is an array of strings or objects with text
-				return (
-					msg.content
-						// biome-ignore lint/suspicious/noExplicitAny: 型かおかしいのでこれでいい
-						.map((part: any) => {
-							if (typeof part === "string") return part;
-							if (typeof part === "object" && part.text) return part.text;
-							return "";
-						})
-						.join("")
-				);
-			}
-		}
-	}
-
 	return "";
 };
 
-const _summarizeGemma3_12B = async (ai: AiBinding, transcript: string) => {
+const _summarizeGemma3_12B = async (
+	ai: AiBinding,
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => {
 	const llmResponse = await ai.run("@cf/google/gemma-3-12b-it", {
-		messages: [
-			{ role: "system", content: SYSTEM_PROMPT },
-			{
-				role: "user",
-				content: transcript,
-			},
-		],
+		messages: buildSummarizationMessages(
+			transcript,
+			minutesLanguage,
+			summaryPreference,
+		),
 	});
 
 	console.log("[Summarization] Gemma 3 12B response received.");
@@ -394,17 +584,20 @@ const _summarizeGemma3_12B = async (ai: AiBinding, transcript: string) => {
 	return "";
 };
 
-const _summarizeMistral24B = async (ai: AiBinding, transcript: string) => {
+const _summarizeMistral24B = async (
+	ai: AiBinding,
+	transcript: string,
+	minutesLanguage: MinutesLanguage,
+	summaryPreference: string,
+) => {
 	const llmResponse = await ai.run(
 		"@cf/mistralai/mistral-small-3.1-24b-instruct",
 		{
-			messages: [
-				{ role: "system", content: SYSTEM_PROMPT },
-				{
-					role: "user",
-					content: transcript,
-				},
-			],
+			messages: buildSummarizationMessages(
+				transcript,
+				minutesLanguage,
+				summaryPreference,
+			),
 		},
 	);
 
