@@ -44,6 +44,12 @@ const handleFileSelect = async (file: File) => {
 	uploadProgress.value = 0;
 	statusMessage.value = "準備中...";
 
+	// Cancel any ongoing extraction
+	if (isExtracting.value) {
+		cancelExtraction();
+		await nextTick(); // Ensure UI updates before starting new extraction
+	}
+
 	// Show extraction status if video
 	if (file.type.startsWith("video/")) {
 		watch(
@@ -213,6 +219,13 @@ const uploadToR2 = (
               :style="{ width: `${uploadProgress}%` }"
             ></div>
           </div>
+          <button
+            v-if="isExtracting"
+            @click="cancelExtraction"
+            class="cancel-button"
+          >
+            キャンセル
+          </button>
         </div>
       </div>
     </div>
@@ -306,5 +319,13 @@ const uploadToR2 = (
 
 .progress-bar {
   @apply bg-blue-500 h-full rounded-full transition-all duration-300 ease-out;
+}
+
+.cancel-button {
+  @apply mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200;
+
+  @media (prefers-color-scheme: dark) {
+    @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+  }
 }
 </style>
