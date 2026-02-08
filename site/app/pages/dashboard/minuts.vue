@@ -83,7 +83,7 @@ const handleFileSelect = async (file: File) => {
 				addToast("音声の抽出に成功しました", "success");
 			} catch (e) {
 				console.error("Audio extraction failed:", e);
-				if (extractionErrorType) {
+				if (extractionErrorType != null) {
 					addToast(getErrorMessage(extractionErrorType), "error");
 				} else {
 					addToast(
@@ -247,13 +247,13 @@ const uploadToR2 = (
             class="error-suggestion"
           >
             <div class="error-message">
-              {{ getErrorMessage(extractionErrorType) }}
+              {{ getErrorMessage(extractionErrorType ?? null) }}
             </div>
             <div class="alternative-actions">
               <div class="alternative-title">代替手段:</div>
               <div class="alternative-options">
                 <button 
-                  @click="() => { errorMessage = null; }"
+                  @click="() => { errorMessage = null; error = null; }"
                   class="alt-button"
                 >
                   別のファイルを選択
