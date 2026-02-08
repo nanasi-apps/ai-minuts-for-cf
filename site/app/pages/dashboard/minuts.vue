@@ -34,8 +34,13 @@ const {
 	getErrorMessage,
 } = useAudioExtractor();
 
+const currentFile = ref<File | null>(null);
+
 const handleFileSelect = async (file: File) => {
 	if (isUploading.value) return;
+
+	// Store current file
+	currentFile.value = file;
 
 	// Validate file type client-side as well
 	if (!["video/mp4", "audio/mpeg", "audio/wav"].includes(file.type)) {
@@ -83,8 +88,8 @@ const handleFileSelect = async (file: File) => {
 				addToast("音声の抽出に成功しました", "success");
 			} catch (e) {
 				console.error("Audio extraction failed:", e);
-				if (extractionErrorType != null) {
-					addToast(getErrorMessage(extractionErrorType), "error");
+				if (extractionErrorType.value != null) {
+					addToast(getErrorMessage(extractionErrorType.value), "error");
 				} else {
 					addToast(
 						"音声抽出に失敗しました。動画のみアップロードします。",
@@ -237,7 +242,7 @@ const uploadToR2 = (
           </button>
           <button
             v-if="extractionError && retryCount < 2"
-            @click="() => retryExtraction(file)"
+            @click="() => { const file = currentFile.value; if (file) retryExtraction(file); }"
             class="retry-button"
           >
             再試行 ({{ retryCount }}/2)
@@ -253,7 +258,7 @@ const uploadToR2 = (
               <div class="alternative-title">代替手段:</div>
               <div class="alternative-options">
                 <button 
-                  @click="() => { errorMessage = null; error = null; }"
+                  @click="() => { if (errorMessage.value !== null) errorMessage.value = null; if (extractionError.value !== null) extractionError.value = null; }"
                   class="alt-button"
                 >
                   別のファイルを選択
