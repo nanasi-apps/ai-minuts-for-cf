@@ -187,8 +187,8 @@ export function useAudioExtractor() {
 		}
 	});
 
-	const getErrorMessage = (type: typeof errorType.value): string => {
-		switch (type) {
+	const getErrorMessage = (type: typeof errorType.value | null): string => {
+		switch (type ?? null) {
 			case "format_error":
 				return "ファイル形式が対応していません。MP4, MP3, WAV形式のファイルをアップロードしてください。";
 			case "memory_error":
