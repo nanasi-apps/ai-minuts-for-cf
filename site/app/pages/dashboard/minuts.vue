@@ -31,10 +31,25 @@ const {
 	extractAudioFromVideo,
 	retryExtraction,
 	cancel: cancelExtraction,
+	clearErrors: clearExtractionErrors,
 	getErrorMessage,
 } = useAudioExtractor();
 
 const currentFile = ref<File | null>(null);
+
+const handleRetryExtraction = () => {
+	const file = currentFile.value;
+	if (file) {
+		retryExtraction(file);
+	}
+};
+
+const handleClearErrors = () => {
+	if (errorMessage.value !== null) {
+		errorMessage.value = null;
+	}
+	clearExtractionErrors();
+};
 
 const handleFileSelect = async (file: File) => {
 	if (isUploading.value) return;
@@ -242,7 +257,7 @@ const uploadToR2 = (
           </button>
           <button
             v-if="extractionError && retryCount < 2"
-            @click="() => { const file = currentFile.value; if (file) retryExtraction(file); }"
+            @click="handleRetryExtraction"
             class="retry-button"
           >
             再試行 ({{ retryCount }}/2)
@@ -258,7 +273,7 @@ const uploadToR2 = (
               <div class="alternative-title">代替手段:</div>
               <div class="alternative-options">
                 <button 
-                  @click="() => { if (errorMessage.value !== null) errorMessage.value = null; if (extractionError.value !== null) extractionError.value = null; }"
+                  @click="handleClearErrors"
                   class="alt-button"
                 >
                   別のファイルを選択

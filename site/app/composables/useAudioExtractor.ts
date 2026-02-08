@@ -175,10 +175,17 @@ export function useAudioExtractor() {
 		if (worker.value) {
 			worker.value.terminate();
 			worker.value = null;
-			isProcessing.value = false;
-			progress.value = 0;
-			stage.value = "";
 		}
+		isProcessing.value = false;
+		progress.value = 0;
+		stage.value = "";
+		error.value = null;
+		errorType.value = null;
+	};
+
+	const clearErrors = () => {
+		error.value = null;
+		errorType.value = null;
 	};
 
 	onUnmounted(() => {
@@ -227,6 +234,7 @@ export function useAudioExtractor() {
 		extractAudioFromVideo,
 		retryExtraction,
 		cancel,
+		clearErrors,
 		getErrorMessage,
 	};
 }
