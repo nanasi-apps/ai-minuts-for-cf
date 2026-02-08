@@ -25,8 +25,13 @@ const {
 	isProcessing: isExtracting,
 	progress: extractionProgress,
 	stage: extractionStage,
+	error: extractionError,
+	errorType: extractionErrorType,
+	retryCount,
 	extractAudioFromVideo,
+	retryExtraction,
 	cancel: cancelExtraction,
+	getErrorMessage,
 } = useAudioExtractor();
 
 const handleFileSelect = async (file: File) => {
@@ -78,10 +83,14 @@ const handleFileSelect = async (file: File) => {
 				addToast("音声の抽出に成功しました", "success");
 			} catch (e) {
 				console.error("Audio extraction failed:", e);
-				addToast(
-					"音声抽出に失敗しました。動画のみアップロードします。",
-					"info",
-				);
+				if (extractionErrorType) {
+					addToast(getErrorMessage(extractionErrorType), "error");
+				} else {
+					addToast(
+						"音声抽出に失敗しました。動画のみアップロードします。",
+						"info",
+					);
+				}
 			}
 		}
 
@@ -226,6 +235,35 @@ const uploadToR2 = (
           >
             キャンセル
           </button>
+          <button
+            v-if="extractionError && retryCount < 2"
+            @click="() => retryExtraction(file)"
+            class="retry-button"
+          >
+            再試行 ({{ retryCount }}/2)
+          </button>
+          <div
+            v-if="extractionError"
+            class="error-suggestion"
+          >
+            <div class="error-message">
+              {{ getErrorMessage(extractionErrorType) }}
+            </div>
+            <div class="alternative-actions">
+              <div class="alternative-title">代替手段:</div>
+              <div class="alternative-options">
+                <button 
+                  @click="() => { errorMessage = null; }"
+                  class="alt-button"
+                >
+                  別のファイルを選択
+                </button>
+                <div class="alt-text">
+                  MP3やWAV形式の音声ファイルでアップロードすると、変換せずにすみやくに処理されます。
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -326,6 +364,58 @@ const uploadToR2 = (
 
   @media (prefers-color-scheme: dark) {
     @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+  }
+}
+
+.retry-button {
+  @apply mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200;
+}
+
+.error-suggestion {
+  @apply mt-4 p-4 rounded-xl border bg-red-50 text-red-600 border-red-200 text-sm;
+
+  @media (prefers-color-scheme: dark) {
+    @apply bg-red-900/20 text-red-400 border-red-800;
+  }
+}
+
+.error-message {
+  @apply mb-3 font-medium;
+}
+
+.alternative-actions {
+  @apply border-t border-red-200 pt-3 mt-3;
+
+  @media (prefers-color-scheme: dark) {
+    @apply border-red-800;
+  }
+}
+
+.alternative-title {
+  @apply text-sm font-medium mb-2 text-red-700;
+
+  @media (prefers-color-scheme: dark) {
+    @apply text-red-300;
+  }
+}
+
+.alternative-options {
+  @apply space-y-3;
+}
+
+.alt-button {
+  @apply px-3 py-2 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors duration-200 text-red-600;
+
+  @media (prefers-color-scheme: dark) {
+    @apply bg-gray-800 border-red-700 text-red-300 hover:bg-gray-700;
+  }
+}
+
+.alt-text {
+  @apply text-xs text-gray-600;
+
+  @media (prefers-color-scheme: dark) {
+    @apply text-gray-400;
   }
 }
 </style>

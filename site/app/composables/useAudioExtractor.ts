@@ -4,6 +4,16 @@ export function useAudioExtractor() {
 	const progress = ref(0);
 	const stage = ref("");
 	const error = ref<string | null>(null);
+	const errorType = ref<
+		| "format_error"
+		| "memory_error"
+		| "file_error"
+		| "decode_error"
+		| "worker_error"
+		| null
+	>(null);
+	const retryCount = ref(0);
+	const maxRetries = 2;
 
 	const initializeWorker = () => {
 		if (worker.value) {
@@ -132,7 +142,30 @@ export function useAudioExtractor() {
 				} as const);
 			});
 		} catch (err) {
-			error.value = err instanceof Error ? err.message : String(err);
+			const errorMessage = err instanceof Error ? err.message : String(err);
+			error.value = errorMessage;
+
+			if (
+				errorMessage.includes("format") ||
+				errorMessage.includes("unsupported")
+			) {
+				errorType.value = "format_error";
+			} else if (
+				errorMessage.includes("memory") ||
+				errorMessage.includes("too large")
+			) {
+				errorType.value = "memory_error";
+			} else if (
+				errorMessage.includes("decode") ||
+				errorMessage.includes("audio data")
+			) {
+				errorType.value = "decode_error";
+			} else if (errorMessage.includes("Worker")) {
+				errorType.value = "worker_error";
+			} else {
+				errorType.value = "file_error";
+			}
+
 			isProcessing.value = false;
 			throw err;
 		}
@@ -154,12 +187,46 @@ export function useAudioExtractor() {
 		}
 	});
 
+	const getErrorMessage = (type: typeof errorType.value): string => {
+		switch (type) {
+			case "format_error":
+				return "ファイル形式が対応していません。MP4, MP3, WAV形式のファイルをアップロードしてください。";
+			case "memory_error":
+				return "ファイルが大きすぎるか、メモリが不足しています。ブラウザを再起動するか、小さいファイルをお試しください。";
+			case "decode_error":
+				return "音声データのデコードに失敗しました。ファイルが破損している可能性があります。";
+			case "worker_error":
+				return "音声変換処理でエラーが発生しました。もう一度お試しください。";
+			case "file_error":
+				return "ファイルの読み込みに失敗しました。ファイルを再選択してください。";
+			default:
+				return "音声抽出に失敗しました。動画のみアップロードします。";
+		}
+	};
+
+	const retryExtraction = async (file: File) => {
+		if (retryCount.value >= maxRetries) {
+			throw new Error("最大リトライ回数に達しました。");
+		}
+
+		retryCount.value++;
+		error.value = null;
+		errorType.value = null;
+
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		return extractAudioFromVideo(file);
+	};
+
 	return {
 		isProcessing: readonly(isProcessing),
 		progress: readonly(progress),
 		stage: readonly(stage),
 		error: readonly(error),
+		errorType: readonly(errorType),
+		retryCount: readonly(retryCount),
 		extractAudioFromVideo,
+		retryExtraction,
 		cancel,
+		getErrorMessage,
 	};
 }

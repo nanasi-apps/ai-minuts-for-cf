@@ -123,10 +123,16 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
 				throw new Error(`Unknown message type: ${(message as any).type}`);
 		}
 	} catch (error) {
-		console.error("[Worker] Error:", error);
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		console.error("[Worker] Error:", {
+			error: errorMessage,
+			message: event.data,
+			stack: error instanceof Error ? error.stack : undefined,
+			timestamp: new Date().toISOString(),
+		});
 		self.postMessage({
 			type: "error",
-			error: error instanceof Error ? error.message : String(error),
+			error: errorMessage,
 		} satisfies ErrorMessage);
 	}
 };
