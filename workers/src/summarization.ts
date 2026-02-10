@@ -70,18 +70,29 @@ Your job is to create structured minutes that satisfy every rule below.
 
 # OUTPUT FORMAT (use the target output language for section titles and content)
 
+0. 会議タイプ判定（Template Entry）
+   * Determine the meeting type from the transcript content only.
+   * Meeting types:
+     - 勉強会（Study Session: 勉強会, 研修, ハンズオン, 講義, レクチャー）
+     - 定例（Regular: 定例, 週次, 月次, ステータス共有）
+     - 意思決定（Decision: 承認, 稟議, 方針決定, 合意）
+   * This classification is used **only** to select output rules; do **not** output the type itself.
+   * If unclear, treat as 定例/意思決定 (i.e., include all sections below).
+
 1. 概要（Summary）
    * 50–180 characters.
    * Concise main points only; **no timeline info**.
 
 2. 決定事項（Decisions）
    * Only items explicitly marked as decisions/approvals/agreements.
-   * If none: 「なし」.
+   * If meeting type is 勉強会: **omit this entire section** (no heading, no 「なし」).
+   * Otherwise, if none: 「なし」.
 
 3. 次のアクション（Next Actions）
    * Include tasks clearly verbalized as actions (e.g., 「〜を行います」「〜を進めます」「〜をお願いします」).
    * No inferred tasks.
-   * If none: 「なし」.
+   * If meeting type is 勉強会: **omit this entire section** (no heading, no 「なし」).
+   * Otherwise, if none: 「なし」.
 
 4. タイムライン（Timeline）
    * Max 10 bullets; 1 bullet = 1 key event.
@@ -259,6 +270,53 @@ const normalizeSummaryPreference = (preference: unknown): string => {
 	return preference.trim().slice(0, SUMMARY_PREFERENCE_MAX_LENGTH);
 };
 
+const STUDY_SESSION_KEYWORDS = [
+	/勉強会/,
+	/研修/,
+	/ハンズオン/,
+	/講義/,
+	/レクチャー/,
+	/study session/i,
+	/workshop/i,
+	/training/i,
+	/lecture/i,
+];
+
+const escapeRegExp = (value: string): string =>
+	value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const shouldOmitDecisionsAndActions = (transcript: string): boolean =>
+	STUDY_SESSION_KEYWORDS.some((keyword) => keyword.test(transcript));
+
+const stripSection = (summary: string, headings: string[]): string => {
+	const headingPattern = headings.map(escapeRegExp).join("|");
+	if (!headingPattern) return summary;
+
+	const sectionRegex = new RegExp(
+		`^\\s*\\d+\\.\\s*(?:${headingPattern}).*?(?=^\\s*\\d+\\.\\s|\\s*$)`,
+		"gms",
+	);
+
+	return summary
+		.replace(sectionRegex, "")
+		.replace(/\n{3,}/g, "\n\n")
+		.trim();
+};
+
+const stripDecisionsAndActions = (summary: string): string => {
+	const decisionsHeadings = ["決定事項（Decisions）", "決定事項", "Decisions"];
+	const nextActionsHeadings = [
+		"次のアクション（Next Actions）",
+		"次のアクション",
+		"Next Actions",
+	];
+
+	return stripSection(
+		stripSection(summary, decisionsHeadings),
+		nextActionsHeadings,
+	);
+};
+
 const extractAssistantContent = (llmResponse: unknown): string => {
 	const content =
 		// @ts-expect-error - The type definition might not match the actual response structure for this model
@@ -395,7 +453,7 @@ const buildQualityCheckMessages = (
 Checks:
 1) Output language must be ${minutesLanguage === "ja" ? "Japanese" : "English"} only.
 2) Summary length is 50–180 characters.
-3) Section headings appear in order: Summary, Decisions, Next Actions, Timeline, Agenda, Detailed Agenda (only if applicable and placed after Agenda), Risks/Concerns, Open Questions. When absent, use 「なし」 or omit according to the rules.
+3) Section headings appear in order: Summary, Decisions, Next Actions, Timeline, Agenda, Detailed Agenda (only if applicable and placed after Agenda), Risks/Concerns, Open Questions. When absent, use 「なし」 or omit according to the rules. If the transcript indicates a 勉強会, Decisions and Next Actions must be omitted entirely.
 4) Timeline lines each start with a label like [0.00 - 1.00] and there are at most 10.
 5) Detailed Agenda appears after Agenda and before Risks/Concerns when present.
 6) No fabrication; the minutes must be concise and structured.
@@ -475,6 +533,10 @@ export async function summarizeTranscript(
 			summaryPreference,
 			feedback,
 		);
+
+		if (shouldOmitDecisionsAndActions(transcript)) {
+			summary = stripDecisionsAndActions(summary);
+		}
 
 		const quality = await checkMinutesQuality(
 			ai,
